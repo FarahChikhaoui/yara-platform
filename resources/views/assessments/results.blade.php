@@ -1181,16 +1181,14 @@
     <div class="flex flex-wrap items-start justify-between gap-6">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wide text-yellow-600">
-                AI-powered interpretation of your organization's readiness profile
-            </p>
+AI-POWERED READINESS INSIGHTS            </p>
 
             <h2 class="mt-2 text-2xl font-bold text-slate-900">
                 AI Readiness Analysis
             </h2>
 
             <p class="mt-2 text-slate-500">
-                Strategic interpretation of your organization's readiness profile.
-            </p>
+Strategic insights based on your organization's assessment results.            </p>
         </div>
 
         <div class="flex flex-col items-end gap-2">
@@ -2197,8 +2195,7 @@
             </p>
 
             <h3 class="mt-2 text-2xl font-bold text-slate-950">
-                Consultant Guidance
-            </h3>
+Expert Guidance            </h3>
 
             <p class="mt-2 text-sm leading-6 text-slate-500">
                 Final implementation guidance and considerations provided during expert review.
@@ -2232,12 +2229,63 @@
                 </div>
             @endif
 
-        </div>
+               </div>
 
     </div>
 
 @endif
-    </section>
+
+
+{{-- Final roadmap download --}}
+<div class="border-t border-slate-200 bg-white px-6 py-8 md:px-8">
+
+    <div class="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-6
+                md:flex-row md:items-center md:justify-between">
+
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-yellow-600">
+                Final Deliverable
+            </p>
+
+            <h3 class="mt-2 text-xl font-bold text-slate-950">
+                Your Expert-Reviewed Transformation Roadmap
+            </h3>
+
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Download your finalized roadmap including prioritized initiatives,
+                implementation actions, success metrics and expert guidance.
+            </p>
+        </div>
+
+        <a
+            href="{{ route('assessment.transformation.roadmap.pdf', $assessment) }}"
+            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl
+                   bg-slate-950 px-5 py-3 text-sm font-bold text-white transition
+                   hover:bg-yellow-400 hover:text-slate-950"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="h-5 w-5"
+                aria-hidden="true"
+            >
+                <path d="M12 3v12"></path>
+                <path d="m7 10 5 5 5-5"></path>
+                <path d="M5 21h14"></path>
+            </svg>
+
+            Download Roadmap PDF
+        </a>
+
+    </div>
+
+</div>
+
+
+</section>
 
 @endif
 
@@ -2808,66 +2856,59 @@ if (barCanvas) {
 
 
             {{-- PLATFORM --}}
-            <div>
+<div>
 
-                <h3 class="text-base font-semibold text-white">
-                    Platform
-                </h3>
+    <h3 class="text-base font-semibold text-white">
+        Platform
+    </h3>
 
-                <div class="mt-4 flex flex-col gap-3 text-sm text-slate-400">
+    <div class="mt-4 flex flex-col gap-3 text-sm text-slate-400">
 
-                    <a href="/register"
-                       class="w-fit transition hover:text-yellow-400">
-                        Get Started
-                    </a>
+        <a href="{{ route('dashboard') }}"
+           class="w-fit transition hover:text-yellow-400">
+            Dashboard
+        </a>
 
-                    <a href="/login"
-                       class="w-fit transition hover:text-yellow-400">
-                        Login
-                    </a>
+        <a href="{{ route('assessment.start') }}"
+           class="w-fit transition hover:text-yellow-400">
+            AI Readiness Assessment
+        </a>
 
-                    <a href="#about"
-                       class="w-fit transition hover:text-yellow-400">
-                        About YARA
-                    </a>
+        <a href="{{ route('transformation.start') }}"
+           class="w-fit transition hover:text-yellow-400">
+            Transformation Roadmap
+        </a>
 
-                </div>
+    </div>
 
-            </div>
-
-
+</div>
             {{-- RESOURCES --}}
-            <div>
+<div>
 
-                <h3 class="text-base font-semibold text-white">
-                    Resources
-                </h3>
+    <h3 class="text-base font-semibold text-white">
+        Resources
+    </h3>
 
-                <div class="mt-4 flex flex-col gap-3 text-sm text-slate-400">
+    <div class="mt-4 flex flex-col gap-3 text-sm text-slate-400">
 
-                    <a href="#process"
-                       class="w-fit transition hover:text-yellow-400">
-                        How it works
-                    </a>
+        <a href="{{ url('/') }}#process"
+           class="w-fit transition hover:text-yellow-400">
+            How it works
+        </a>
 
-                    <a href="#engagements"
-                       class="w-fit transition hover:text-yellow-400">
-                        Delivery formats
-                    </a>
+        <a href="{{ url('/') }}#engagements"
+           class="w-fit transition hover:text-yellow-400">
+            Delivery formats
+        </a>
 
-                    <a href="#pulse-check"
-                       class="w-fit transition hover:text-yellow-400">
-                        Pulse Check
-                    </a>
+        <a href="{{ url('/') }}#faq"
+           class="w-fit transition hover:text-yellow-400">
+            FAQ
+        </a>
 
-                    <a href="#faq"
-                       class="w-fit transition hover:text-yellow-400">
-                        FAQ
-                    </a>
+    </div>
 
-                </div>
-
-            </div>
+</div>
 
 
             {{-- CONTACT --}}

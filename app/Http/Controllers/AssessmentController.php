@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use Throwable;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AssessmentController extends Controller
 {
@@ -2392,6 +2393,71 @@ $this->authorizeClientAssessment($assessment);
             ]);
         }
     }
+    public function downloadTransformationRoadmapPdf(Assessment $assessment)
+{
+    /*
+     * Security:
+     * only the client who owns this assessment
+     * may download its Transformation roadmap.
+     */
+    $this->authorizeClientAssessment($assessment);
+
+    /*
+     * Only Transformation engagements can
+     * have a Transformation roadmap PDF.
+     */
+    abort_unless(
+        $assessment->engagement_type === 'transformation',
+        404
+    );
+
+    /*
+     * The PDF is a FINAL expert-reviewed deliverable.
+     * It must not be downloadable while the roadmap
+     * is still being prepared.
+     */
+    abort_unless(
+        $assessment->transformation_status === 'roadmap_ready',
+        404
+    );
+
+    /*
+     * Load everything needed by the PDF.
+     */
+    $assessment->load([
+        'company',
+        'transformationRoadmap.initiatives',
+    ]);
+
+    $roadmap = $assessment->transformationRoadmap;
+
+    abort_unless($roadmap, 404);
+
+    $pdf = Pdf::loadView(
+        'assessments.transformation-roadmap-pdf',
+        compact('assessment', 'roadmap')
+    );
+
+    /*
+     * Produce a clean filename such as:
+     * YARA-Transformation-Roadmap-Acme.pdf
+     */
+    $companyName = $assessment->company?->name ?? 'Organization';
+
+    $safeCompanyName = preg_replace(
+        '/[^A-Za-z0-9\-]+/',
+        '-',
+        $companyName
+    );
+
+    $safeCompanyName = trim($safeCompanyName, '-');
+
+    return $pdf->download(
+        'YARA-Transformation-Roadmap-'
+        . $safeCompanyName
+        . '.pdf'
+    );
+}
 
     private function authorizeClientAssessment(Assessment $assessment): void
 {

@@ -238,6 +238,12 @@ Route::post(
     ->middleware('auth')
     ->name('assessment.roadmap.preferences');
 
+    Route::get(
+    '/assessment/{assessment}/transformation/roadmap/pdf',
+    [AssessmentController::class, 'downloadTransformationRoadmapPdf']
+)
+    ->name('assessment.transformation.roadmap.pdf');
+
     });
 Route::get('/start-full-assessment', function () {
     session(['assessment_intent' => 'assessment']);
