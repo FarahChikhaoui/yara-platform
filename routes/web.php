@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\AdminTransformationController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DimensionController;
@@ -320,22 +321,69 @@ Route::middleware('auth')
     ->prefix('consultant')
     ->group(function () {
 
+        /*
+         * Consultant dashboard
+         * Shows paid Transformation engagements only.
+         */
         Route::get(
             'dashboard',
             [ConsultantController::class, 'dashboard']
         )->name('consultant.dashboard');
 
+
+        /*
+         * Open a Transformation request.
+         */
         Route::get(
             'assessments/{assessment}',
             [ConsultantController::class, 'review']
         )->name('consultant.assessments.review');
 
+
+        /*
+         * Explicitly start consultant review:
+         * submitted → in_review
+         */
+       Route::post(
+    'assessments/{assessment}/roadmap/generate',
+    [ConsultantController::class, 'generateRoadmap']
+)->name('consultant.roadmap.generate');
+
+Route::patch(
+    '/consultant/roadmap/initiatives/{initiative}',
+    [ConsultantController::class, 'updateRoadmapInitiative']
+)->name('consultant.roadmap.initiatives.update');
+
+Route::delete(
+    '/consultant/roadmap/initiatives/{initiative}',
+    [ConsultantController::class, 'deleteRoadmapInitiative']
+)->name('consultant.roadmap.initiatives.delete');
+
+Route::post(
+    '/consultant/assessments/{assessment}/roadmap/initiatives',
+    [ConsultantController::class, 'createRoadmapInitiative']
+)->name('consultant.roadmap.initiatives.create');
+
+Route::post(
+    '/consultant/assessments/{assessment}/roadmap/finalize',
+    [ConsultantController::class, 'finalizeRoadmap']
+)->name('consultant.roadmap.finalize');
+
+Route::patch(
+    '/consultant/assessments/{assessment}/roadmap/guidance',
+    [ConsultantController::class, 'updateRoadmapGuidance']
+)->name('consultant.roadmap.guidance.update');
+        /*
+         * Submit consultant review.
+         *
+         * We'll adapt the controller logic later when we build
+         * the roadmap finalization workflow.
+         */
         Route::post(
-    '/consultant/assessments/{assessment}/review',
-    [ConsultantController::class, 'submitReview']
-)
-    ->middleware('auth')
-    ->name('consultant.assessments.submit-review');
+            'assessments/{assessment}/review',
+            [ConsultantController::class, 'submitReview']
+        )->name('consultant.assessments.submit-review');
+
     });
 
     
@@ -363,6 +411,15 @@ Route::middleware(['auth', 'admin'])
             'recommendation-rules',
             RecommendationRuleController::class
         );
+Route::get(
+        '/transformations',
+        [AdminTransformationController::class, 'index']
+    )->name('admin.transformations.index');
+
+    Route::patch(
+    '/transformations/{assessment}/assign',
+    [AdminTransformationController::class, 'assign']
+)->name('admin.transformations.assign');
 
         Route::get(
             'assessments',

@@ -205,6 +205,31 @@
                     </svg>
                     <span x-show="!sidebarCollapsed" x-transition.opacity>Assessments</span>
                 </a>
+                <a 
+    href="{{ route('admin.transformations.index') }}"
+    title="Transformation Requests" 
+    class="group flex items-center gap-3 rounded-xl px-4 py-3 transition 
+    {{ request()->is('admin/transformations*') 
+        ? 'bg-yellow-400 text-slate-950' 
+        : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}" 
+>
+    <svg 
+        class="h-5 w-5 flex-shrink-0" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+    >
+        <path d="M3 3v18h18"/>
+        <path d="M7 16l4-4 3 3 5-7"/>
+    </svg>
+
+    <span x-show="!sidebarCollapsed" x-transition.opacity>
+        Transformation Requests
+    </span>
+</a>
             </div>
 
         </nav>

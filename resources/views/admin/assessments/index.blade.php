@@ -68,12 +68,10 @@
                 <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                     <tr>
                         <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 w-8">#</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500">Assessment</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500">Company</th>
+                   <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500">Company</th>
                         <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500">User</th>
                         <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500">Status</th>
                         <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500">Date</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 text-right">Actions</th>
                     </tr>
                 </thead>
 
@@ -90,11 +88,6 @@
                                 {{ $i + 1 }}
                             </td>
 
-                            {{-- Title --}}
-                            <td class="px-6 py-5">
-                                <p class="font-semibold text-slate-900">{{ $assessment->title }}</p>
-                                <p class="text-xs text-slate-400 mt-0.5 font-mono">#{{ $assessment->id }}</p>
-                            </td>
 
                             {{-- Company --}}
                             <td class="px-6 py-5">
@@ -145,23 +138,13 @@
                                 @endif
                             </td>
 
-                            {{-- Actions --}}
-                            <td class="px-6 py-5 text-right">
-                                <a href="/assessment/results/{{ $assessment->id }}"
-                                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    View Results
-                                </a>
-                            </td>
+                            
 
                         </tr>
 
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-16 text-center">
+                            <td colspan="6" class="px-6 py-16 text-center">
                                 <p class="text-lg font-semibold text-slate-700">No assessments yet</p>
                                 <p class="mt-2 text-sm text-slate-500">Assessments will appear here once organizations start submitting.</p>
                             </td>

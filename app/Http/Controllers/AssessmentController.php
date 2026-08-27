@@ -1365,7 +1365,10 @@ return redirect()
             403
         );
 
-        $assessment->load('company');
+       $assessment->load([
+    'company',
+    'transformationRoadmap.initiatives',
+]);
 
         $responses = Response::with([
             'answerOption',

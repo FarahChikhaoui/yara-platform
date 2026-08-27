@@ -42,7 +42,8 @@ protected $fillable = [
 'transformation_status',
 'payment_status',
 'paid_at',
-'stripe_checkout_session_id'
+'stripe_checkout_session_id',
+'assigned_consultant_id'
 ];
 
 public function recommendations()
@@ -57,5 +58,15 @@ public function roadmapPreference()
 {
     return $this->hasOne(RoadmapPreference::class);
 }
-
+public function transformationRoadmap()
+{
+    return $this->hasOne(TransformationRoadmap::class);
+}
+public function assignedConsultant()
+{
+    return $this->belongsTo(
+        User::class,
+        'assigned_consultant_id'
+    );
+}
 }

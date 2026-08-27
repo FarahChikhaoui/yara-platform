@@ -1181,11 +1181,11 @@
     <div class="flex flex-wrap items-start justify-between gap-6">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wide text-yellow-600">
-                AI-Powered Analysis
+                AI-powered interpretation of your organization's readiness profile
             </p>
 
             <h2 class="mt-2 text-2xl font-bold text-slate-900">
-                Strategic AI Analysis
+                AI Readiness Analysis
             </h2>
 
             <p class="mt-2 text-slate-500">
@@ -1209,23 +1209,7 @@
                     </span>
                 @endif
 
-                @if($aiAnalysis)
-                    <form method="POST"
-                          action="{{ route('assessment.generate-ai-summary', $assessment) }}"
-                          data-ai-form>
-                        @csrf
-
-                        <button type="submit"
-                                data-ai-submit
-                                title="Regenerate analysis"
-                                class="group inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:border-yellow-300 hover:bg-yellow-50 hover:text-yellow-700 disabled:cursor-not-allowed disabled:opacity-60">
-                            <svg data-ai-icon class="h-3.5 w-3.5 transition-transform duration-500 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                            </svg>
-                            <span data-ai-label>Regenerate</span>
-                        </button>
-                    </form>
-                @endif
+                
             </div>
         </div>
     </div>
@@ -1275,7 +1259,9 @@
 </section>
 @if($assessment->engagement_type === 'transformation')
     {{-- Personalized, AI-generated transformation roadmap --}}
-    <section id="roadmap" class="scroll-mt-24 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+@if($assessment->transformation_status !== 'roadmap_ready')
+
+<section id="roadmap" class="scroll-mt-24 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
             <div class="flex flex-col gap-5 border-b border-slate-200 bg-slate-950 px-6 py-7 text-white md:flex-row md:items-center md:justify-between md:px-8">
 
@@ -1577,6 +1563,7 @@
             </div>
 
     </section>
+    @endif
 @else
 
     {{-- =====================================================
@@ -1788,7 +1775,7 @@
                 <div class="shrink-0">
 
                     <a
-                        href="{{ route('assessment.results', $assessment) }}#roadmap"
+                        href="{{ route('assessment.results', $assessment) }}#final-roadmap"
                         class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
                     >
                         View Transformation Roadmap
@@ -1833,12 +1820,428 @@
 
             @endif
 
-        </div>
+                </div>
 
     </div>
 </section>
 
 @endif
+
+
+{{-- =====================================================
+     FINAL EXPERT-REVIEWED TRANSFORMATION ROADMAP
+====================================================== --}}
+@if(
+    $assessment->transformation_status === 'roadmap_ready'
+    && $assessment->transformationRoadmap
+    && $assessment->transformationRoadmap->status === 'ready'
+    && $assessment->transformationRoadmap->finalized_at
+)
+
+    <section
+        id="final-roadmap"
+        class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+    >
+
+   @php
+    $finalRoadmap = $assessment->transformationRoadmap;
+    $finalInitiatives = $finalRoadmap->initiatives;
+@endphp
+
+{{-- Header --}}
+<div class="border-b border-slate-800 bg-slate-950 px-6 py-8 text-white md:px-8">
+
+    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-400">
+                Expert-Reviewed Transformation Plan
+            </p>
+
+            <h2 class="mt-2 text-3xl font-bold">
+                Your Transformation Roadmap
+            </h2>
+
+            <p class="mt-3 max-w-2xl leading-7 text-slate-300">
+                Your personalized roadmap has been reviewed and finalized by a
+                Yellomind consultant based on your AI readiness assessment and
+                transformation priorities.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+
+            <span class="inline-flex items-center rounded-full bg-green-400/10 px-4 py-2 text-sm font-bold text-green-300 ring-1 ring-inset ring-green-400/20">
+                ✓ Expert Reviewed
+            </span>
+
+            <span class="inline-flex items-center rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950">
+                {{ $finalInitiatives->count() }}
+                {{ $finalInitiatives->count() === 1 ? 'Initiative' : 'Initiatives' }}
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{{-- Roadmap overview --}}
+<div class="border-b border-slate-200 bg-slate-50 px-6 py-6 md:px-8">
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Status
+            </p>
+
+            <p class="mt-2 font-bold text-green-700">
+                Roadmap Ready
+            </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Initiatives
+            </p>
+
+            <p class="mt-2 text-2xl font-bold text-slate-950">
+                {{ $finalInitiatives->count() }}
+            </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Finalized
+            </p>
+
+            <p class="mt-2 font-bold text-slate-950">
+                {{ optional($finalRoadmap->finalized_at)->format('d M Y') }}
+            </p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Delivery
+            </p>
+
+            <p class="mt-2 font-bold text-slate-950">
+                Expert Validated
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+
+{{-- Initiatives --}}
+<div class="space-y-5 p-6 md:p-8">
+
+    <div>
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-yellow-600">
+            Implementation Priorities
+        </p>
+
+        <h3 class="mt-2 text-2xl font-bold text-slate-950">
+            Prioritized Initiatives
+        </h3>
+
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+            Recommended initiatives ordered according to your transformation priorities.
+        </p>
+    </div>
+
+    @forelse($finalInitiatives as $initiative)
+
+        <article class="rounded-2xl border border-slate-200 bg-white p-6">
+
+            <div class="flex items-start gap-4">
+
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
+                    {{ $loop->iteration }}
+                </div>
+
+                <div class="min-w-0 flex-1">
+
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+
+                        <div>
+                            @if($initiative->dimension)
+                                <p class="text-xs font-bold uppercase tracking-wide text-yellow-600">
+                                    {{ $initiative->dimension }}
+                                </p>
+                            @endif
+
+                            <h4 class="mt-1 text-xl font-bold text-slate-950">
+                                {{ $initiative->title }}
+                            </h4>
+                        </div>
+
+                        <span class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold
+                            {{ $initiative->priority === 'high'
+                                ? 'bg-red-100 text-red-700'
+                                : ($initiative->priority === 'low'
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-yellow-100 text-yellow-700') }}">
+                            {{ ucfirst($initiative->priority ?? 'medium') }} Priority
+                        </span>
+
+                    </div>
+
+                    <p class="mt-4 leading-7 text-slate-600">
+                        {{ $initiative->description }}
+                    </p>
+
+                </div>
+                                </div>
+
+{{-- Initiative details --}}
+<div class="mt-6 grid gap-5 border-t border-slate-100 pt-6 lg:grid-cols-2">
+
+    {{-- Business rationale --}}
+    @if($initiative->business_rationale)
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Why This Matters
+            </p>
+
+            <p class="mt-2 text-sm leading-6 text-slate-600">
+                {{ $initiative->business_rationale }}
+            </p>
+        </div>
+    @endif
+
+
+    {{-- Expected outcome --}}
+    @if($initiative->expected_outcome)
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Expected Outcome
+            </p>
+
+            <p class="mt-2 text-sm leading-6 text-slate-600">
+                {{ $initiative->expected_outcome }}
+            </p>
+        </div>
+    @endif
+
+
+    {{-- Recommended actions --}}
+    @if(!empty($initiative->recommended_actions))
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Recommended Actions
+            </p>
+
+            <ul class="mt-3 space-y-2">
+                @foreach($initiative->recommended_actions as $action)
+                    <li class="flex gap-2 text-sm leading-6 text-slate-600">
+                        <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-500"></span>
+                        <span>{{ $action }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+
+    {{-- Success metrics --}}
+    @if(!empty($initiative->success_metrics))
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Success Metrics
+            </p>
+
+            <ul class="mt-3 space-y-2">
+                @foreach($initiative->success_metrics as $metric)
+                    <li class="flex gap-2 text-sm leading-6 text-slate-600">
+                        <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500"></span>
+                        <span>{{ $metric }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+</div>
+
+
+{{-- Delivery information --}}
+@if(
+    $initiative->phase ||
+    $initiative->investment ||
+    $initiative->effort ||
+    $initiative->impact
+)
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+
+        @if($initiative->phase)
+            <div class="rounded-xl bg-slate-50 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400">
+                    Phase
+                </p>
+                <p class="mt-1 text-sm font-semibold text-slate-800">
+                    {{ $initiative->phase }}
+                </p>
+            </div>
+        @endif
+
+        @if($initiative->investment)
+            <div class="rounded-xl bg-slate-50 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400">
+                    Investment
+                </p>
+                <p class="mt-1 text-sm font-semibold text-slate-800">
+                    {{ $initiative->investment }}
+                </p>
+            </div>
+        @endif
+
+        @if($initiative->effort)
+            <div class="rounded-xl bg-slate-50 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400">
+                    Effort
+                </p>
+                <p class="mt-1 text-sm font-semibold text-slate-800">
+                    {{ ucfirst($initiative->effort) }}
+                </p>
+            </div>
+        @endif
+
+        @if($initiative->impact)
+            <div class="rounded-xl bg-slate-50 p-4">
+                <p class="text-xs font-bold uppercase text-slate-400">
+                    Impact
+                </p>
+                <p class="mt-1 text-sm font-semibold text-slate-800">
+                    {{ ucfirst($initiative->impact) }}
+                </p>
+            </div>
+        @endif
+
+    </div>
+@endif
+
+
+{{-- Dependencies --}}
+@if(!empty($initiative->dependencies))
+    <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+
+        <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+            Dependencies
+        </p>
+
+        <ul class="mt-3 space-y-2">
+            @foreach($initiative->dependencies as $dependency)
+                <li class="flex gap-2 text-sm leading-6 text-slate-600">
+                    <span>•</span>
+                    <span>{{ $dependency }}</span>
+                </li>
+            @endforeach
+        </ul>
+
+    </div>
+@endif
+
+
+{{-- Standard reference --}}
+@if($initiative->standard_reference)
+    <div class="mt-5">
+        <span class="inline-flex rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
+            {{ $initiative->standard_reference }}
+        </span>
+    </div>
+@endif
+
+
+{{-- Consultant-specific guidance --}}
+@if($initiative->consultant_guidance)
+    <div class="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-5">
+
+        <p class="text-xs font-bold uppercase tracking-wide text-yellow-700">
+            Expert Guidance
+        </p>
+
+        <p class="mt-2 text-sm leading-6 text-slate-700">
+            {{ $initiative->consultant_guidance }}
+        </p>
+
+    </div>
+@endif
+            </div>
+
+        </article>
+
+    @empty
+
+        <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+            <p class="text-sm text-slate-500">
+                No finalized initiatives are available.
+            </p>
+        </div>
+
+    @endforelse
+
+</div>
+{{-- Overall Expert Guidance --}}
+@if($finalRoadmap->consultant_notes || $finalRoadmap->risks_dependencies)
+
+    <div class="border-t border-slate-200 bg-slate-50 px-6 py-8 md:px-8">
+
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-yellow-600">
+                Expert Review
+            </p>
+
+            <h3 class="mt-2 text-2xl font-bold text-slate-950">
+                Consultant Guidance
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Final implementation guidance and considerations provided during expert review.
+            </p>
+        </div>
+
+        <div class="mt-6 grid gap-5 lg:grid-cols-2">
+
+            @if($finalRoadmap->consultant_notes)
+                <div class="rounded-2xl border border-slate-200 bg-white p-6">
+
+                    <p class="text-sm font-bold text-slate-950">
+                        Implementation Guidance
+                    </p>
+
+                    <p class="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{{ $finalRoadmap->consultant_notes }}</p>
+
+                </div>
+            @endif
+
+
+            @if($finalRoadmap->risks_dependencies)
+                <div class="rounded-2xl border border-slate-200 bg-white p-6">
+
+                    <p class="text-sm font-bold text-slate-950">
+                        Risks & Dependencies
+                    </p>
+
+                    <p class="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{{ $finalRoadmap->risks_dependencies }}</p>
+
+                </div>
+            @endif
+
+        </div>
+
+    </div>
+
+@endif
+    </section>
+
+@endif
+
+
 </div>
 
 <script>

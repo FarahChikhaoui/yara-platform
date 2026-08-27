@@ -33,9 +33,9 @@ class AuthenticatedSessionController extends Controller
         /*
          * Admin keeps the existing admin redirect.
          */
-        if ($user->role === 'admin') {
-            return redirect('/admin/dimensions');
-        }
+       if ($user->role === 'admin') {
+    return redirect('/admin/dashboard');
+}
 
         /*
          * Consultant keeps the existing consultant redirect.

@@ -287,15 +287,7 @@
                     </div>
 
 
-                    {{-- Test mode notice --}}
-                    <div class="mt-5 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3">
-
-                        <p class="text-xs leading-5 text-yellow-800">
-                            <span class="font-bold">Test mode:</span>
-                            No real payment will be processed.
-                        </p>
-
-                    </div>
+                    
 
                 </div>
 
