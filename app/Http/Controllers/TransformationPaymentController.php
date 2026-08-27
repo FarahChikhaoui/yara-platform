@@ -16,15 +16,16 @@ class TransformationPaymentController extends Controller
     {
         $user = auth()->user();
 
-        /*
-         * Security:
-         * The assessment must belong to the
-         * logged-in user's organization.
-         */
-        abort_unless(
-            $assessment->company_id === $user->company_id,
-            403
-        );
+/*
+ * Security:
+ * only the client who owns this assessment
+ * may access its Transformation payment page.
+ */
+abort_unless(
+    (int) $assessment->user_id === (int) $user->id,
+    403,
+    'This assessment does not belong to you.'
+);
 
         /*
          * Payment is only available after
@@ -77,16 +78,16 @@ class TransformationPaymentController extends Controller
     public function checkout(Assessment $assessment)
     {
         $user = auth()->user();
-
-        /*
-         * Security:
-         * Assessment must belong to the
-         * logged-in user's organization.
-         */
-        abort_unless(
-            $assessment->company_id === $user->company_id,
-            403
-        );
+/*
+ * Security:
+ * only the client who owns this assessment
+ * may start checkout for it.
+ */
+abort_unless(
+    (int) $assessment->user_id === (int) $user->id,
+    403,
+    'This assessment does not belong to you.'
+);
 
         /*
          * Assessment must be completed.
@@ -223,14 +224,15 @@ class TransformationPaymentController extends Controller
     ) {
         $user = auth()->user();
 
-        /*
-         * Security:
-         * Assessment must belong to the
-         * logged-in user's organization.
-         */
-       abort_unless(
-    (string) $assessment->company_id === (string) $user->company_id,
-    403
+/*
+ * Security:
+ * only the client who owns this assessment
+ * may complete its payment return flow.
+ */
+abort_unless(
+    (int) $assessment->user_id === (int) $user->id,
+    403,
+    'This assessment does not belong to you.'
 );
 
         /*
@@ -279,6 +281,16 @@ class TransformationPaymentController extends Controller
         ) {
             abort(403);
         }
+        /*
+ * Make sure the Stripe Session also belongs
+ * to the currently authenticated client.
+ */
+if (
+    (string) ($session->metadata->user_id ?? '')
+    !== (string) $user->id
+) {
+    abort(403);
+}
 
         /*
          * Make sure this is also the Stripe Session

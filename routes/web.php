@@ -129,8 +129,7 @@ $maturityLevels = \App\Models\MaturityLevel::orderBy('min_score')
         'assessmentHistory'
     ));
 
-})->middleware(['auth'])->name('dashboard');
-
+})->middleware(['auth', 'client'])->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
@@ -143,23 +142,33 @@ Route::middleware('auth')->group(function () {
 Route::get(
     '/assessment/{assessment}/transformation/payment',
     [TransformationPaymentController::class, 'show']
-)->name('transformation.payment.page');
+)
+    ->middleware('client')
+    ->name('transformation.payment.page');
 
 Route::post(
     '/assessment/{assessment}/transformation/checkout',
     [TransformationPaymentController::class, 'checkout']
-)->name('transformation.payment.checkout');
-
+)
+    ->middleware('client')
+    ->name('transformation.payment.checkout');
 
 Route::get(
     '/assessment/{assessment}/transformation/payment/success',
     [TransformationPaymentController::class, 'success']
-)->name('transformation.payment.success');
+)
+    ->middleware('client')
+    ->name('transformation.payment.success');
+
 
 Route::post(
     '/assessment/{assessment}/start-transformation',
     [AssessmentController::class, 'startTransformationFromAssessment']
-)->name('transformation.from-assessment');
+)
+    ->middleware('client')
+    ->name('transformation.from-assessment');
+
+
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -177,6 +186,7 @@ Route::post(
 | Assessment
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth', 'client'])->group(function () {
 Route::get(
     '/assessment/{assessment}/transformation/submitted',
     [AssessmentController::class, 'transformationSubmitted']
@@ -227,6 +237,8 @@ Route::post(
 )
     ->middleware('auth')
     ->name('assessment.roadmap.preferences');
+
+    });
 Route::get('/start-full-assessment', function () {
     session(['assessment_intent' => 'assessment']);
 
@@ -253,17 +265,19 @@ Route::get('/build-transformation-roadmap', function () {
  * — added here to match every other assessment route.
  */
 Route::post('/assessment/{assessment}/generate-roadmap', [AssessmentController::class, 'generateRoadmap'])
-    ->middleware('auth')
+    ->middleware(['auth', 'client'])
     ->name('assessment.generate-roadmap');
 
 Route::post('/company/store', [CompanyController::class, 'store'])
-    ->middleware('auth');
+    ->middleware(['auth', 'client']);
+
 Route::get(
     '/assessment/results/{assessment}/country',
     [AssessmentController::class, 'countryInsights']
 )
-    ->middleware('auth')
+    ->middleware(['auth', 'client'])
     ->name('assessment.country');
+    
 
 /*
 |--------------------------------------------------------------------------
@@ -317,7 +331,7 @@ Route::get('/pulse-check/{token}/results', [PulseCheckController::class, 'result
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')
+Route::middleware(['auth', 'consultant'])
     ->prefix('consultant')
     ->group(function () {
 

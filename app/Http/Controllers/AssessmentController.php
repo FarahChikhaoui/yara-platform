@@ -90,15 +90,11 @@ class AssessmentController extends Controller
 }
 public function startTransformationFromAssessment(Assessment $assessment)
 {
-    $user = auth()->user();
-
-    /*
-     * The assessment must belong to the current user's company.
-     */
-    abort_unless(
-        $assessment->company_id === $user->company_id,
-        403
-    );
+   /*
+ * Only the client who owns this assessment
+ * may start Transformation from it.
+ */
+$this->authorizeClientAssessment($assessment);
 
     /*
      * Only a completed assessment can be used
@@ -181,13 +177,8 @@ public function startTransformationFromAssessment(Assessment $assessment)
 }
 public function resume(Assessment $assessment)
 {
-    $user = auth()->user();
-
-    abort_unless(
-        $user->isAdmin() ||
-        $assessment->company_id === $user->company_id,
-        403
-    );
+   // Only the client who owns this assessment may resume it
+$this->authorizeClientAssessment($assessment);
 
     abort_unless($assessment->status === 'in_progress', 404);
 
@@ -213,17 +204,13 @@ public function resume(Assessment $assessment)
 }
 public function saveAnswer(Request $request, Assessment $assessment)
 {
-    $user = auth()->user();
+   // -------------------------------------------------
+// ACCESS CONTROL
+// -------------------------------------------------
 
-    // -------------------------------------------------
-    // ACCESS CONTROL
-    // -------------------------------------------------
-
-    abort_unless(
-        $user->isAdmin() ||
-        $assessment->company_id === $user->company_id,
-        403
-    );
+// Only the client who owns this assessment
+// may save or change its answers.
+$this->authorizeClientAssessment($assessment);
 
     // Only unfinished assessments can be modified
     abort_unless(
@@ -271,7 +258,8 @@ public function saveAnswer(Request $request, Assessment $assessment)
 
     $assessment = Assessment::with('company')
         ->findOrFail($request->assessment_id);
-
+// Security: only the owner may submit this assessment.
+$this->authorizeClientAssessment($assessment);
 
     // -------------------------------------------------
     // REQUIRE ALL ACTIVE QUESTIONS TO BE ANSWERED
@@ -305,19 +293,7 @@ public function saveAnswer(Request $request, Assessment $assessment)
         $missingQuestionIds->count()
     );
     }
-        /*
-         * Security check:
-         * the authenticated user may only submit an assessment
-         * belonging to their own company.
-         */
-        $user = auth()->user();
-
-        abort_unless(
-            $user->isAdmin() ||
-            $assessment->company_id === $user->company_id,
-            403
-        );
-
+        
         /*
          * Prevent duplicate responses if the form is accidentally submitted twice.
          */
@@ -386,17 +362,12 @@ public function generateAiSummary(
     Assessment $assessment,
     GroqAIService $ai
 ) {
-    $user = auth()->user();
-
     /*
-     * Security:
-     * the client can only generate AI analysis
-     * for an assessment belonging to their organization.
-     */
-    abort_unless(
-        $assessment->company_id === $user->company_id,
-        403
-    );
+ * Security:
+ * only the client who owns this assessment
+ * may generate its AI strategic analysis.
+ */
+$this->authorizeClientAssessment($assessment);
 
     /*
      * AI analysis only makes sense once
@@ -670,17 +641,12 @@ public function generateRoadmap(
     Assessment $assessment,
     GroqAIService $ai
 ) {
-    $user = auth()->user();
-
-    /*
-     * Security:
-     * the client can only generate a roadmap
-     * for an assessment belonging to their organization.
-     */
-    abort_unless(
-        $assessment->company_id === $user->company_id,
-        403
-    );
+   /*
+ * Security:
+ * only the client who owns this assessment
+ * may generate its Transformation roadmap.
+ */
+$this->authorizeClientAssessment($assessment);
 
     /*
      * A roadmap only makes sense once
@@ -1351,19 +1317,14 @@ return redirect()
     );
 }
 
-    public function results(Assessment $assessment)
+    function results(Assessment $assessment)
     {
         /*
-         * Security check:
-         * users may only view assessments belonging to their own company.
-         */
-        $user = auth()->user();
-
-        abort_unless(
-            $user->isAdmin() ||
-            $assessment->company_id === $user->company_id,
-            403
-        );
+ * Security:
+ * only the client who owns this assessment
+ * may view its results.
+ */
+$this->authorizeClientAssessment($assessment);
 
        $assessment->load([
     'company',
@@ -1471,17 +1432,12 @@ return redirect()
     }
 public function countryInsights(Assessment $assessment)
 {
-    $user = auth()->user();
-
-    // -------------------------------------------------
-    // ACCESS CONTROL
-    // -------------------------------------------------
-
-    abort_unless(
-        $user->isAdmin() ||
-        $assessment->company_id === $user->company_id,
-        403
-    );
+    /*
+ * Security:
+ * only the client who owns this assessment
+ * may access its country insights.
+ */
+$this->authorizeClientAssessment($assessment);
 
     $assessment->load('company');
 
@@ -1506,7 +1462,7 @@ public function countryInsights(Assessment $assessment)
 
 
     // -------------------------------------------------
-    // AVAILABLE YEARS
+    // AVAILABLE Ypublic EARS
     // -------------------------------------------------
 
     $availableYears = $countryHistory
@@ -2090,16 +2046,12 @@ public function saveRoadmapPreferences(
     Request $request,
     Assessment $assessment
 ) {
-    $user = auth()->user();
-
     /*
-     * Security: this assessment must belong
-     * to the current user's organization.
-     */
-    abort_unless(
-        $assessment->company_id === $user->company_id,
-        403
-    );
+ * Security:
+ * only the client who owns this assessment
+ * may save its Transformation preferences.
+ */
+$this->authorizeClientAssessment($assessment);
 
     /*
      * Only completed Transformation assessments
@@ -2212,16 +2164,12 @@ public function saveRoadmapPreferences(
 }
 public function transformationSubmitted(Assessment $assessment)
 {
-    $user = auth()->user();
-
-    /*
-     * The assessment must belong to the
-     * current client's organization.
-     */
-    abort_unless(
-        $assessment->company_id === $user->company_id,
-        403
-    );
+   /*
+ * Security:
+ * only the client who owns this assessment
+ * may view its Transformation submission status.
+ */
+$this->authorizeClientAssessment($assessment);
 
     /*
      * This page only exists for the
@@ -2444,4 +2392,17 @@ public function transformationSubmitted(Assessment $assessment)
             ]);
         }
     }
+
+    private function authorizeClientAssessment(Assessment $assessment): void
+{
+    $user = auth()->user();
+
+    abort_unless(
+        $user &&
+        $user->role === 'client' &&
+        (int) $assessment->user_id === (int) $user->id,
+        403,
+        'This assessment does not belong to you.'
+    );
+}
 }
