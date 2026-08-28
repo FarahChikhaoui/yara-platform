@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="flex flex-col min-h-0" style="height: 100%;">
-
+<div class="pointer-events-none fixed -top-24 left-1/2 -z-10 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-yellow-300/10 blur-3xl"></div>
     {{-- HEADER --}}
     <div class="flex items-start justify-between mb-5 flex-shrink-0">
         <div>

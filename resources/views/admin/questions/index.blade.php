@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="flex flex-col min-h-0" style="height: 100%;">
-
+<div class="pointer-events-none fixed -top-24 left-1/2 -z-10 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-yellow-300/10 blur-3xl"></div>
     {{-- HEADER --}}
     <div class="flex items-start justify-between mb-5 flex-shrink-0">
         <div>
@@ -13,9 +13,11 @@
             <div class="flex items-center gap-4 mt-1">
                 <h1 class="text-4xl font-bold text-slate-950">Questions</h1>
                 <a href="{{ route('questions.create') }}"
-                   class="flex items-center gap-2 px-4 h-10 rounded-full bg-yellow-400 text-slate-950 text-sm font-semibold hover:scale-105 transition">
-                    + Add Question
-                </a>
+       class="flex items-center gap-2 px-4 h-10 rounded-full
+              bg-slate-950 text-white text-sm font-semibold
+              hover:bg-slate-800 hover:scale-105 transition">
+        +
+    </a>
             </div>
             <p class="mt-2 text-slate-500">
                 Manage YARA assessment questions and their answer options.

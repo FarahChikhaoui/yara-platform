@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="space-y-8">
-
+<div class="pointer-events-none fixed -top-24 left-1/2 -z-10 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-yellow-300/10 blur-3xl"></div>
     {{-- PAGE HEADER --}}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 

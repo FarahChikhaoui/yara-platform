@@ -166,19 +166,35 @@
                         <span x-show="!sidebarCollapsed" x-transition.opacity>Maturity Levels</span>
                     </a>
 
-                    <a
-                        href="{{ route('recommendation-rules.index') }}"
-                        title="Recommendation Rules"
-                        class="group flex items-center gap-3 rounded-xl px-4 py-3 transition
-                        {{ request()->routeIs('recommendation-rules.*')
-                            ? 'bg-yellow-400 text-slate-950'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
-                    >
-                        <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 6h16M4 12h10M4 18h6"/>
-                        </svg>
-                        <span x-show="!sidebarCollapsed" x-transition.opacity>Recommendation Rules</span>
-                    </a>
+                   <div class="mt-7 px-4">
+    <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+        Benchmark Data
+    </p>
+</div>
+
+<a
+    href="{{ route('admin.country-data.index') }}"
+    class="mt-2 flex items-center gap-3 rounded-xl px-4 py-3
+        {{ request()->routeIs('admin.country-data.*')
+            ? 'bg-yellow-400 text-slate-950'
+            : 'text-slate-200 hover:bg-slate-800' }}"
+>
+    <svg
+        class="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+    >
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.2-2.4 3.5-5.5 3.5-9S14.2 5.4 12 3m0 18c-2.2-2.4-3.5-5.5-3.5-9S9.8 5.4 12 3M3.5 9h17M3.5 15h17"
+        />
+    </svg>
+
+    <span>Country Data</span>
+</a>
 
                 </div>
             </div>

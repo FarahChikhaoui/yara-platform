@@ -12,11 +12,11 @@ use App\Http\Controllers\AnswerOptionController;
 use App\Http\Controllers\MaturityLevelController;
 use App\Http\Controllers\AdminAssessmentController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\RecommendationRuleController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\PulseCheckController;
 use App\Http\Controllers\ConsultantController;
 use App\Http\Controllers\TransformationPaymentController;
+use App\Http\Controllers\AdminCountryDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -199,7 +199,10 @@ Route::get('/assessment/start', [AssessmentController::class, 'start'])
     Route::get('/transformation/start', [AssessmentController::class, 'startTransformation'])
     ->middleware('auth')
     ->name('transformation.start');
-
+Route::get(
+    '/transformation/{assessment}/brief',
+    [AssessmentController::class, 'transformationBrief']
+)->name('transformation.brief');
 Route::get('/assessment/{assessment}/resume', [AssessmentController::class, 'resume'])
     ->middleware('auth')
     ->name('assessment.resume');
@@ -427,14 +430,33 @@ Route::middleware(['auth', 'admin'])
 
         Route::resource('maturity-levels', MaturityLevelController::class);
 
-        Route::resource(
-            'recommendation-rules',
-            RecommendationRuleController::class
-        );
 Route::get(
         '/transformations',
         [AdminTransformationController::class, 'index']
     )->name('admin.transformations.index');
+Route::get(
+    '/country-data',
+    [AdminCountryDataController::class, 'index']
+)->name('admin.country-data.index');
+
+Route::patch(
+    '/country-data/datasets/{dataset}/activate',
+    [AdminCountryDataController::class, 'activate']
+)->name('admin.country-data.datasets.activate');
+Route::get(
+    '/country-data/import',
+    [AdminCountryDataController::class, 'createImport']
+)->name('admin.country-data.import');
+
+Route::post(
+    '/country-data/import',
+    [AdminCountryDataController::class, 'storeImport']
+)->name('admin.country-data.import.store');
+
+Route::delete(
+    '/country-data/datasets/{dataset}',
+    [AdminCountryDataController::class, 'destroyDataset']
+)->name('admin.country-data.datasets.destroy');
 
     Route::patch(
     '/transformations/{assessment}/assign',

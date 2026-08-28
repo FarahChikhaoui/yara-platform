@@ -6,52 +6,36 @@
     $gap = $benchmarkGap !== null ? round($benchmarkGap, 1) : null;
 @endphp
 
-<div class="mx-auto max-w-7xl space-y-6">
-
-    {{-- TOOLBAR: back navigation + year selector, grouped --}}
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-        <a
-            href="{{ url('/assessment/results/' . $assessment->id) }}"
-            class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/>
-            </svg>
-            Back to assessment results
-        </a>
+{{-- Floating back button --}}
+<a
+    href="{{ url('/assessment/results/' . $assessment->id) }}"
+    aria-label="Back to assessment results"
+    title="Back to assessment results"
+    class="fixed left-5 top-1/2 z-50 flex h-12 w-12 -translate-y-1/2
+           items-center justify-center rounded-full border border-slate-200
+           bg-white text-slate-500 shadow-lg transition-all duration-200
+           hover:-translate-x-0.5 hover:text-slate-950 hover:shadow-xl"
+>
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        class="h-5 w-5"
+    >
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 18l-6-6 6-6"
+        />
+    </svg>
+</a>
 
         
 
 
-        <form method="GET"
-              action="{{ url('/assessment/results/' . $assessment->id . '/country') }}"
-              class="flex items-center gap-3">
-
-            {{-- Keep selected comparison country when changing year --}}
-            @if(request('compare'))
-                <input type="hidden" name="compare" value="{{ request('compare') }}">
-            @endif
-
-            <label for="year" class="text-sm font-semibold text-slate-500">
-                Benchmark year
-            </label>
-
-            <select
-                id="year"
-                name="year"
-                onchange="this.form.submit()"
-                class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition focus:border-yellow-400 focus:ring-yellow-400"
-            >
-                @foreach($availableYears as $year)
-                    <option value="{{ $year }}" {{ (string) $selectedYear === (string) $year ? 'selected' : '' }}>
-                        {{ $year }}
-                    </option>
-                @endforeach
-            </select>
-
-        </form>
-
+       
     </div>
 
 
@@ -63,9 +47,56 @@
             {{-- Country information --}}
             <div class="p-8 md:p-10">
 
-                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-400">
-                    Country Benchmark
-                </p>
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-400">
+        Country Benchmark
+    </p>
+
+    {{-- Benchmark year selector --}}
+    <form
+        method="GET"
+        action="{{ url('/assessment/results/' . $assessment->id . '/country') }}"
+        class="flex items-center gap-3"
+    >
+        {{-- Keep selected comparison country when changing year --}}
+        @if(request('compare'))
+            <input
+                type="hidden"
+                name="compare"
+                value="{{ request('compare') }}"
+            >
+        @endif
+
+        <label
+            for="year"
+            class="text-xs font-semibold uppercase tracking-wide text-slate-500"
+        >
+            Benchmark year
+        </label>
+
+        <select
+            id="year"
+            name="year"
+            onchange="this.form.submit()"
+            class="rounded-xl border border-slate-700 bg-slate-900
+                   px-3 py-2 text-sm font-bold text-white
+                   outline-none transition
+                   focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20"
+        >
+            @foreach($availableYears as $year)
+                <option
+                    value="{{ $year }}"
+                    {{ (string) $selectedYear === (string) $year ? 'selected' : '' }}
+                >
+                    {{ $year }}
+                </option>
+            @endforeach
+        </select>
+
+    </form>
+
+</div>
 
                 <h1 class="mt-3 text-4xl font-bold tracking-tight md:text-5xl">
                     {{ $country->country }}
@@ -78,11 +109,6 @@
 
                 <div class="mt-8 flex flex-wrap gap-3">
 
-                    @if($country->year)
-                        <span class="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-300">
-                            Benchmark year {{ $country->year }}
-                        </span>
-                    @endif
 
                     @if($country->score_type)
                         <span class="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-300">

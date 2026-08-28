@@ -36,24 +36,9 @@ abort_unless(
             404
         );
 
-        /*
-         * This checkout belongs only to the
-         * Transformation workflow.
-         */
-        abort_unless(
-            $assessment->engagement_type === 'transformation',
-            403
-        );
+        
 
-        /*
-         * The Transformation must still be
-         * in the planning/payment stage.
-         */
-        abort_unless(
-            $assessment->transformation_status === 'planning',
-            409
-        );
-
+       
         /*
          * The Transformation brief must already
          * exist before payment can begin.
@@ -96,25 +81,15 @@ abort_unless(
             $assessment->status === 'completed',
             404
         );
-
-        /*
-         * Only Transformation engagements
-         * can use this checkout.
-         */
-        abort_unless(
-            $assessment->engagement_type === 'transformation',
-            403
-        );
-
-        /*
-         * Do not allow checkout after the request
-         * has already been submitted.
-         */
-        abort_unless(
-            $assessment->transformation_status === 'planning',
-            409
-        );
-
+/*
+ * Do not create another checkout once this
+ * Transformation service has already been paid for.
+ */
+abort_if(
+    $assessment->payment_status === 'paid',
+    409,
+    'This Transformation Roadmap has already been purchased.'
+);
         /*
          * A Transformation brief must exist.
          */
@@ -236,14 +211,6 @@ abort_unless(
 );
 
         /*
-         * This must be a Transformation assessment.
-         */
-        abort_unless(
-            $assessment->engagement_type === 'transformation',
-            403
-        );
-
-        /*
          * Get the Stripe Checkout Session ID
          * returned by Stripe.
          */
@@ -327,15 +294,15 @@ if (
          * NOW the Transformation request can
          * officially enter expert review.
          */
-        $assessment->update([
-            'payment_status' => 'paid',
+      $assessment->update([
+    'engagement_type' => 'transformation',
+    'transformation_status' => 'submitted',
 
-            'paid_at' => now(),
+    'payment_status' => 'paid',
+    'paid_at' => now(),
 
-            'stripe_checkout_session_id' => $session->id,
-
-            'transformation_status' => 'submitted',
-        ]);
+    'stripe_checkout_session_id' => $session->id,
+]);
 
         /*
          * Show the confirmation page we

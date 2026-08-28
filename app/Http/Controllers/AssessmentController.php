@@ -8,14 +8,13 @@ use App\Models\Dimension;
 use App\Models\MaturityLevel;
 use App\Models\Response;
 use Illuminate\Http\Request;
-use App\Models\AssessmentRecommendation;
-use App\Models\RecommendationRule;
 use App\Services\GroqAIService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use Throwable;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\BenchmarkDataset;
 
 class AssessmentController extends Controller
 {
@@ -91,15 +90,15 @@ class AssessmentController extends Controller
 }
 public function startTransformationFromAssessment(Assessment $assessment)
 {
-   /*
- * Only the client who owns this assessment
- * may start Transformation from it.
- */
-$this->authorizeClientAssessment($assessment);
+    /*
+     * Only the client who owns this assessment
+     * may start Transformation from it.
+     */
+    $this->authorizeClientAssessment($assessment);
 
     /*
      * Only a completed assessment can be used
-     * to start the Transformation Roadmap service.
+     * as the basis for a Transformation Roadmap.
      */
     abort_unless(
         $assessment->status === 'completed',
@@ -107,32 +106,90 @@ $this->authorizeClientAssessment($assessment);
     );
 
     /*
-     * Convert this completed self-assessment into
-     * a Transformation engagement.
+     * IMPORTANT:
+     * Do NOT convert the assessment into a Transformation
+     * engagement yet.
      *
-     * The assessment itself is reused:
-     * scores, responses, AI analysis and results
-     * remain attached to the same assessment.
-     */
-   $assessment->update([
-    'engagement_type' => 'transformation',
-    'transformation_status' => 'planning',
-]);
-
-    /*
-     * Return to the same results page.
+     * At this stage, the client is only exploring/configuring
+     * the paid Transformation service.
      *
-     * Because engagement_type is now "transformation",
-     * Blade will automatically replace the upgrade CTA
-     * with the existing roadmap planning section.
+     * The assessment becomes a Transformation engagement
+     * only after successful payment.
      */
     return redirect()
-        ->route('assessment.results', $assessment)
-        ->with(
-            'success',
-            'Transformation planning is now available. Define your priorities, timeline and investment capacity below.'
-        );
+        ->route('transformation.brief', $assessment);
 }
+public function transformationBrief(Assessment $assessment)
+{
+    /*
+     * Only the client who owns the assessment
+     * may access its Transformation brief.
+     */
+    $this->authorizeClientAssessment($assessment);
+
+    /*
+     * A Transformation Roadmap can only be built
+     * from a completed readiness assessment.
+     */
+    abort_unless(
+        $assessment->status === 'completed',
+        404
+    );
+
+    /*
+     * If this Transformation has already been purchased,
+     * the client should no longer edit the planning brief.
+     */
+    abort_if(
+        $assessment->payment_status === 'paid',
+        409,
+        'This Transformation Roadmap has already been purchased.'
+    );
+
+    /*
+     * Determine the organization's current
+     * maturity level.
+     */
+    $maturityLevels = MaturityLevel::orderBy('level')->get();
+
+    $currentMaturity = $maturityLevels->first(
+        function ($level) use ($assessment) {
+            return $assessment->company_score >= $level->min_score
+                && $assessment->company_score <= $level->max_score;
+        }
+    );
+
+    $currentLevelValue = $currentMaturity->level ?? 0;
+
+    /*
+     * The Transformation target must represent
+     * progress beyond the current maturity level.
+     */
+    $targetLevelOptions = $maturityLevels
+        ->filter(
+            fn ($level) => $level->level > $currentLevelValue
+        )
+        ->values();
+
+    /*
+     * Load an existing draft brief if the client
+     * previously started the Transformation journey
+     * but did not complete payment.
+     */
+    $preference = $assessment->roadmapPreference;
+
+    return view(
+        'assessments.transformation-brief',
+        compact(
+            'assessment',
+            'currentMaturity',
+            'currentLevelValue',
+            'targetLevelOptions',
+            'preference'
+        )
+    );
+}
+
    public function startTransformation()
 {
     $user = auth()->user();
@@ -314,19 +371,31 @@ $this->authorizeClientAssessment($assessment);
 
         [$companyScore] = $this->computeWeightedScore($responses);
 
-        $countryBenchmark = null;
+       $countryBenchmark = null;
 
-        if ($assessment->company?->country) {
-            $countryBenchmark = CountryAIReadinessScore::whereRaw(
-                'LOWER(TRIM(country)) = ?',
-                [strtolower(trim($assessment->company->country))]
-            )
-                ->orderByDesc('year')
-                ->first();
-        }
+/*
+ * Use the benchmark dataset explicitly activated
+ * by the YARA administrator.
+ */
+$activeBenchmarkDataset = BenchmarkDataset::where(
+    'is_active',
+    true
+)->first();
 
-        $countryScore = $countryBenchmark?->score;
-        $countryYear = $countryBenchmark?->year;
+if (
+    $assessment->company?->country
+    && $activeBenchmarkDataset
+) {
+    $countryBenchmark = CountryAIReadinessScore::whereRaw(
+        'LOWER(TRIM(country)) = ?',
+        [strtolower(trim($assessment->company->country))]
+    )
+        ->where('year', $activeBenchmarkDataset->year)
+        ->first();
+}
+
+$countryScore = $countryBenchmark?->score;
+$countryYear = $countryBenchmark?->year;
 
         /*
          * YARA Composite Score
@@ -353,8 +422,6 @@ $this->authorizeClientAssessment($assessment);
             'country_ai_year' => $countryYear,
             'combined_score' => round($combinedScore, 2),
         ]);
-
-        $this->generateRecommendations($assessment, $responses);
 
         return redirect('/assessment/results/' . $assessment->id);
     }
@@ -2048,37 +2115,34 @@ public function saveRoadmapPreferences(
     Assessment $assessment
 ) {
     /*
- * Security:
- * only the client who owns this assessment
- * may save its Transformation preferences.
- */
-$this->authorizeClientAssessment($assessment);
+     * Security:
+     * only the client who owns this assessment
+     * may save its Transformation brief.
+     */
+    $this->authorizeClientAssessment($assessment);
 
     /*
-     * Only completed Transformation assessments
-     * can continue to the transformation brief.
+     * Only a completed readiness assessment
+     * can be used for a Transformation Roadmap.
      */
     abort_unless(
         $assessment->status === 'completed',
         404
     );
 
-    abort_unless(
-        $assessment->engagement_type === 'transformation',
-        403
-    );
-
     /*
-     * The client can save the brief only
-     * while the Transformation is still in planning.
+     * Once payment has been completed, the brief
+     * becomes part of the submitted engagement
+     * and can no longer be edited by the client.
      */
-    abort_unless(
-        $assessment->transformation_status === 'planning',
-        409
+    abort_if(
+        $assessment->payment_status === 'paid',
+        409,
+        'This Transformation Roadmap has already been purchased.'
     );
 
     /*
-     * Validate the existing Transformation brief fields.
+     * Validate the Transformation brief.
      */
     $validated = $request->validate([
         'target_level' => [
@@ -2105,20 +2169,14 @@ $this->authorizeClientAssessment($assessment);
             'string',
             'in:3 months,6 months,12 months,18-24 months',
         ],
-
-        'focus_areas' => [
-            'nullable',
-            'array',
-            'max:3',
-        ],
-
-        'focus_areas.*' => [
-            'string',
-        ],
     ]);
 
     /*
      * Save the client's Transformation brief.
+     *
+     * Saving this information does NOT convert
+     * the assessment into a paid Transformation
+     * engagement.
      */
     $assessment->roadmapPreference()->updateOrCreate(
         [
@@ -2131,37 +2189,24 @@ $this->authorizeClientAssessment($assessment);
 
             'budget_level' => $validated['budget'],
 
-            'strategic_priorities' => $validated['focus_areas'] ?? [],
+            'strategic_priorities' => [],
 
             'constraints' => null,
         ]
     );
 
     /*
-     * IMPORTANT:
+     * Continue to the YARA payment summary.
      *
-     * Do NOT mark the Transformation as "submitted" yet.
-     * Expert review should begin only after Stripe confirms
-     * a successful payment.
-     *
-     * For now the Transformation remains in "planning".
-     */
-    $assessment->update([
-        'payment_status' => 'pending',
-    ]);
-
-    /*
-     * Send the client to Stripe Checkout.
-     *
-     * Because the Stripe checkout endpoint is a POST route,
-     * we cannot redirect() directly to that route.
-     * Instead, show a small YARA payment page whose button
-     * POSTs to transformation.payment.checkout.
+     * The assessment remains a normal completed
+     * readiness assessment until Stripe confirms
+     * successful payment.
      */
     return redirect()->route(
         'transformation.payment.page',
         $assessment
     );
+
 }
 public function transformationSubmitted(Assessment $assessment)
 {
@@ -2199,200 +2244,7 @@ $this->authorizeClientAssessment($assessment);
         compact('assessment')
     );
 }
-    private function generateRecommendations(
-        Assessment $assessment,
-        $responses
-    ): void {
-        /*
-         * Remove previously generated actions in case the assessment
-         * is recalculated or submitted again.
-         */
-        AssessmentRecommendation::where(
-            'assessment_id',
-            $assessment->id
-        )->delete();
-
-        $impactWeights = [
-            'Low' => 1,
-            'Medium' => 2,
-            'High' => 3,
-            'Critical' => 4,
-        ];
-
-        /*
-         * Index responses by question ID for fast matching.
-         */
-        $responsesByQuestion = $responses->keyBy('question_id');
-
-        /*
-         * Calculate the average raw answer score (1–4)
-         * for every assessed dimension.
-         */
-        $dimensionRawScores = $responses
-            ->filter(function ($response) {
-                return $response->question
-                    && $response->question->dimension_id
-                    && $response->answerOption;
-            })
-            ->groupBy(function ($response) {
-                return $response->question->dimension_id;
-            })
-            ->map(function ($group) {
-                $totalWeightedScore = 0;
-                $totalWeight = 0;
-
-                foreach ($group as $response) {
-                    $answerScore = (float) $response->answerOption->score;
-                    $questionWeight = (float) (
-                        $response->question->weight ?? 1
-                    );
-
-                    $totalWeightedScore += $answerScore * $questionWeight;
-                    $totalWeight += $questionWeight;
-                }
-
-                return $totalWeight > 0
-                    ? $totalWeightedScore / $totalWeight
-                    : null;
-            });
-
-        $rules = RecommendationRule::where('is_active', true)
-            ->with(['dimension', 'question'])
-            ->get();
-
-        $matchedActions = collect();
-
-        foreach ($rules as $rule) {
-            $triggerScore = null;
-            $ruleMatches = false;
-
-            /*
-             * Question-level rule:
-             * compare the selected answer score directly.
-             */
-            if ($rule->question_id !== null) {
-                $response = $responsesByQuestion->get($rule->question_id);
-
-                if (!$response || !$response->answerOption) {
-                    continue;
-                }
-
-                $triggerScore = (float) $response->answerOption->score;
-
-                $ruleMatches =
-                    $triggerScore <= (float) $rule->max_answer_score;
-            }
-
-            /*
-             * Dimension-level rule:
-             * compare the weighted average answer score for
-             * the complete dimension, still using the 1–4 scale.
-             */
-            if ($rule->question_id === null) {
-                $triggerScore = $dimensionRawScores->get(
-                    $rule->dimension_id
-                );
-
-                if ($triggerScore === null) {
-                    continue;
-                }
-
-                $ruleMatches =
-                    $triggerScore <= (float) $rule->max_answer_score;
-            }
-
-            if (!$ruleMatches) {
-                continue;
-            }
-
-            /*
-             * Severity:
-             * score 1 = severity 4
-             * score 2 = severity 3
-             * score 3 = severity 2
-             * score 4 = severity 1
-             */
-            $severity = max(1, 5 - $triggerScore);
-
-            $impactWeight =
-                $impactWeights[$rule->business_impact] ?? 1;
-
-            /*
-             * Priority combines:
-             * - weakness severity
-             * - business impact
-             * - consultant-defined priority weight
-             */
-            $calculatedPriority =
-                ($severity * 10)
-                + ($impactWeight * 5)
-                + $rule->priority_weight;
-
-            $matchedActions->push([
-                'rule' => $rule,
-                'trigger_score' => $triggerScore,
-                'calculated_priority' => $calculatedPriority,
-            ]);
-        }
-
-        /*
-         * Highest priority first.
-         * Dependency order is used as a secondary ordering rule.
-         */
-        $matchedActions = $matchedActions
-            ->sort(function ($first, $second) {
-                $priorityComparison =
-                    $second['calculated_priority']
-                    <=> $first['calculated_priority'];
-
-                if ($priorityComparison !== 0) {
-                    return $priorityComparison;
-                }
-
-                return $first['rule']->dependency_order
-                    <=> $second['rule']->dependency_order;
-            })
-            ->values();
-
-        foreach ($matchedActions as $index => $matchedAction) {
-            $rule = $matchedAction['rule'];
-
-            AssessmentRecommendation::create([
-                'assessment_id' => $assessment->id,
-                'recommendation_rule_id' => $rule->id,
-                'dimension_id' => $rule->dimension_id,
-                'question_id' => $rule->question_id,
-
-                'triggered_answer_score' => round(
-                    $matchedAction['trigger_score']
-                ),
-
-                'calculated_priority' => round(
-                    $matchedAction['calculated_priority'],
-                    2
-                ),
-
-                'priority_rank' => $index + 1,
-                'status' => 'recommended',
-
-                /*
-                 * Snapshot of the knowledge-base action.
-                 */
-                'action_title' => $rule->action_title,
-                'action_description' => $rule->action_description,
-                'business_rationale' => $rule->business_rationale,
-                'business_impact' => $rule->business_impact,
-                'effort' => $rule->effort,
-                'timeline_min_months' => $rule->timeline_min_months,
-                'timeline_max_months' => $rule->timeline_max_months,
-                'investment_min' => $rule->investment_min,
-                'investment_max' => $rule->investment_max,
-                'currency' => $rule->currency,
-                'dependency_order' => $rule->dependency_order,
-                'standard_reference' => $rule->standard_reference,
-            ]);
-        }
-    }
+    
     public function downloadTransformationRoadmapPdf(Assessment $assessment)
 {
     /*

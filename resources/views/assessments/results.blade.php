@@ -3,7 +3,7 @@
 <div id="page-top"></div>
 
 {{-- Slim scroll-progress indicator, matches the yellow/amber accent --}}
-<div id="scroll-progress" class="fixed left-0 top-0 z-[60] h-1 w-0 bg-gradient-to-r from-yellow-400 to-amber-500 transition-[width] duration-150 ease-out print:hidden"></div>
+<div id="scroll-progress" class="fixed left-0 top-0 z-[60] h-1 w-0 bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-500 shadow-[0_0_10px_rgba(250,204,21,0.55)] transition-[width] duration-150 ease-out print:hidden"></div>
 
 @php
     $organizationScore = (float) ($assessment->company_score ?? $averageScore);
@@ -159,15 +159,16 @@
 <div class="space-y-8">
 
       {{-- Executive report heading --}}
-    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <section class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(15,23,42,0.25)]">
 
-        <div class="border-b border-slate-200 bg-slate-50 px-6 py-4 md:px-8">
+        <div class="relative border-b border-slate-200/80 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-6 py-4 md:px-8">
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
                 <div class="flex flex-wrap items-center gap-3">
 
-                    <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-yellow-700">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-yellow-100 to-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-300/60">
+                        <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                         YARA Executive Report
                     </span>
 
@@ -180,7 +181,7 @@
                 <button
                     type="button"
                     onclick="window.print()"
-                    class="inline-flex w-fit items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
+                    class="inline-flex w-fit items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-100 hover:shadow-md active:translate-y-0"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -204,17 +205,20 @@
 
         </div>
 
-        <div class="px-6 py-8 md:px-8 md:py-10">
+        <div class="relative px-6 py-8 md:px-8 md:py-10">
+
+            <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-yellow-300/10 blur-3xl"></div>
 
             <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 
-               <div class="max-w-4xl">
+               <div class="relative max-w-4xl">
 
-    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-600">
+    <p class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-yellow-600">
+        <span class="h-px w-6 bg-gradient-to-r from-yellow-500 to-transparent"></span>
         Executive AI Readiness Report
     </p>
 
-    <h1 class="mt-3 text-3xl font-bold leading-tight text-slate-950 md:text-4xl">
+    <h1 class="mt-3 text-3xl font-bold leading-tight tracking-tight text-slate-950 md:text-4xl">
         {{ $assessment->title }}
     </h1>
 
@@ -227,9 +231,10 @@
 
                 <div class="grid min-w-full gap-3 sm:grid-cols-3 lg:min-w-[440px]">
 
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="group rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-300/70 hover:bg-white hover:shadow-md">
 
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V7a1 1 0 011-1h4a1 1 0 011 1v14M14 21V4a1 1 0 011-1h4a1 1 0 011 1v17M9 9h.01M9 13h.01M9 17h.01"/></svg>
                             Organization
                         </p>
 
@@ -239,9 +244,10 @@
 
                     </div>
 
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="group rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-300/70 hover:bg-white hover:shadow-md">
 
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             Country
                         </p>
 
@@ -251,9 +257,10 @@
 
                     </div>
 
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="group rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-300/70 hover:bg-white hover:shadow-md">
 
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             Completed
                         </p>
 
@@ -272,8 +279,8 @@
     </section>
 
     @if($coverageIncomplete)
-        <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white">
+        <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-4 shadow-sm">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white shadow-sm shadow-amber-500/30">
                 !
             </div>
             <p class="text-sm leading-6 text-amber-800">
@@ -285,37 +292,46 @@
     @endif
 
    {{-- Main executive summary panel --}}
-<section class="overflow-hidden rounded-3xl bg-slate-950 text-white shadow-xl">
+<section class="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-[0_24px_60px_-24px_rgba(2,6,23,0.55)] ring-1 ring-white/5">
 
-    <div class="grid grid-cols-1 xl:grid-cols-[330px_1fr]">
+    <div class="pointer-events-none absolute inset-0 opacity-[0.35]" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0); background-size: 22px 22px;"></div>
+    <div class="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-32 -right-20 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl"></div>
+
+    <div class="relative grid grid-cols-1 xl:grid-cols-[330px_1fr]">
 
         {{-- Combined score --}}
-        <div class="flex flex-col items-center justify-center border-b border-slate-800 p-8 xl:border-b-0 xl:border-r">
+        <div class="flex flex-col items-center justify-center border-b border-slate-800/80 p-8 xl:border-b-0 xl:border-r xl:border-slate-800/80">
 
             <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                 Combined YARA Score
             </p>
 
-            <div
-                class="relative mt-6 flex h-56 w-56 items-center justify-center rounded-full"
-                style="
-                    background:
-                    conic-gradient(
-                        #facc15 0deg {{ $scoreAngle }}deg,
-                        #1e293b {{ $scoreAngle }}deg 360deg
-                    );
-                "
-            >
-                <div class="flex h-44 w-44 flex-col items-center justify-center rounded-full bg-slate-950">
+            <div class="relative mt-6">
 
-                    <span class="text-6xl font-bold tracking-tight">
-                        {{ number_format($combinedScore, 1) }}
-                    </span>
+                <div class="absolute inset-0 -z-10 rounded-full bg-yellow-400/20 blur-2xl"></div>
 
-                    <span class="mt-2 text-sm text-slate-400">
-                        out of 100
-                    </span>
+                <div
+                    class="relative flex h-56 w-56 items-center justify-center rounded-full shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
+                    style="
+                        background:
+                        conic-gradient(
+                            #facc15 0deg {{ $scoreAngle }}deg,
+                            #1e293b {{ $scoreAngle }}deg 360deg
+                        );
+                    "
+                >
+                    <div class="flex h-44 w-44 flex-col items-center justify-center rounded-full bg-slate-950 shadow-[inset_0_2px_12px_rgba(0,0,0,0.4)]">
 
+                        <span class="text-6xl font-bold tracking-tight text-white drop-shadow-[0_0_18px_rgba(250,204,21,0.25)]">
+                            {{ number_format($combinedScore, 1) }}
+                        </span>
+
+                        <span class="mt-2 text-sm text-slate-400">
+                            out of 100
+                        </span>
+
+                    </div>
                 </div>
             </div>
 
@@ -326,7 +342,7 @@
                         Current maturity level
                     </p>
 
-                    <span class="mt-3 inline-flex rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950">
+                    <span class="mt-3 inline-flex rounded-full bg-gradient-to-r from-yellow-400 to-amber-400 px-4 py-2 text-sm font-bold text-slate-950 shadow-md shadow-yellow-400/20">
                         Level {{ $maturityLevel->level }}
                         — {{ $maturityLevel->label ?? $maturityLevel->name }}
                     </span>
@@ -349,13 +365,13 @@
                 Executive Dashboard
             </p>
 
-            <h2 class="mt-2 text-3xl font-bold">
+            <h2 class="mt-2 text-3xl font-bold tracking-tight">
                 Assessment Overview
             </h2>
 
         </div>
 
-        <div class="rounded-2xl border border-slate-700 bg-slate-900 px-6 py-4">
+        <div class="rounded-2xl border border-slate-700/80 bg-slate-900/80 px-6 py-4 shadow-inner shadow-black/20 backdrop-blur">
 
             <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Overall Status
@@ -369,58 +385,44 @@
 
     </div>
 
-    <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+<div class="mt-6">
+    <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-4 backdrop-blur">
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-4">
-
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Capabilities Assessed
-            </p>
-
-            <p class="mt-2 text-2xl font-bold text-white">
-                {{ $assessedDimensionTotal }}
-            </p>
-
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-4">
-
+        <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Current Maturity
             </p>
 
-            <p class="mt-2 text-2xl font-bold text-white">
-                @if($maturityLevel)
-                    Level {{ $maturityLevel->level }}
-                @else
-                    —
-                @endif
+            <p class="mt-1 text-sm text-slate-400">
+                Overall organizational maturity level
             </p>
-
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-4">
+        <div class="text-right">
+            @if($maturityLevel)
+                <p class="text-xl font-bold text-white">
+                    Level {{ $maturityLevel->level }}
+                </p>
 
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Roadmap Actions
-            </p>
-
-            <p class="mt-2 text-2xl font-bold text-white">
-                {{ $roadmapActionCount ?: '—' }}
-            </p>
-
+                <p class="mt-1 text-sm font-semibold text-yellow-400">
+                    {{ $maturityLevel->label ?? $maturityLevel->name }}
+                </p>
+            @else
+                <p class="text-xl font-bold text-white">—</p>
+            @endif
         </div>
 
     </div>
-
 </div>
 
             {{-- Main KPI cards --}}
             <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-                <div class="group rounded-2xl border border-slate-700 bg-slate-900 p-6 transition hover:border-yellow-400/40">
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-yellow-400/40 hover:shadow-xl hover:shadow-black/30">
 
-                    <div class="flex items-start justify-between">
+                    <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-yellow-400/0 blur-2xl transition group-hover:bg-yellow-400/10"></div>
+
+                    <div class="relative flex items-start justify-between">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                             Organization score
                         </p>
@@ -431,19 +433,21 @@
                         </div>
                     </div>
 
-                    <p class="mt-3 text-4xl font-bold">
+                    <p class="relative mt-3 text-4xl font-bold tracking-tight">
                         {{ number_format($organizationScore, 1) }}
                     </p>
 
-                    <p class="mt-2 text-sm text-slate-400">
+                    <p class="relative mt-2 text-sm text-slate-400">
                         Internal organizational AI maturity
                     </p>
 
                 </div>
 
-                <div class="group flex flex-col rounded-2xl border border-slate-700 bg-slate-900 p-6 transition hover:border-yellow-400/40">
+                <div class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-yellow-400/40 hover:shadow-xl hover:shadow-black/30">
 
-    <div class="flex items-start justify-between">
+    <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-blue-400/0 blur-2xl transition group-hover:bg-blue-400/10"></div>
+
+    <div class="relative flex items-start justify-between">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Country benchmark
         </p>
@@ -456,18 +460,18 @@
 
     @if($countryScore !== null)
 
-        <p class="mt-3 text-4xl font-bold">
+        <p class="relative mt-3 text-4xl font-bold tracking-tight">
             {{ number_format($countryScore, 1) }}
         </p>
 
-        <p class="mt-2 text-sm text-slate-400">
+        <p class="relative mt-2 text-sm text-slate-400">
             {{ $assessment->company->country ?? 'Country' }}
             · {{ $assessment->country_ai_year }}
         </p>
 
         <a
             href="{{ route('assessment.country', $assessment) }}"
-            class="mt-5 inline-flex w-fit items-center gap-2 text-sm font-semibold text-yellow-400 transition hover:text-yellow-300"
+            class="relative mt-5 inline-flex w-fit items-center gap-2 text-sm font-semibold text-yellow-400 transition hover:gap-3 hover:text-yellow-300"
         >
             Explore country intelligence
 
@@ -477,7 +481,7 @@
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
-                class="h-4 w-4"
+                class="h-4 w-4 transition-transform"
             >
                 <path
                     stroke-linecap="round"
@@ -489,7 +493,7 @@
 
     @else
 
-        <p class="mt-4 text-sm font-semibold text-slate-400">
+        <p class="relative mt-4 text-sm font-semibold text-slate-400">
             Unavailable
         </p>
 
@@ -497,9 +501,9 @@
 
 </div>
 
-                <div class="group rounded-2xl border border-slate-700 bg-slate-900 p-6 transition hover:border-yellow-400/40">
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-yellow-400/40 hover:shadow-xl hover:shadow-black/30">
 
-                    <div class="flex items-start justify-between">
+                    <div class="relative flex items-start justify-between">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                             Benchmark position
                         </p>
@@ -514,19 +518,19 @@
 
                     @if($countryGap !== null)
 
-                        <p class="mt-3 text-4xl font-bold {{ $countryGap >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                        <p class="relative mt-3 text-4xl font-bold tracking-tight {{ $countryGap >= 0 ? 'text-green-400' : 'text-red-400' }}">
                             {{ $countryGap >= 0 ? '+' : '' }}
                             {{ number_format($countryGap, 1) }}
                         </p>
 
-                        <p class="mt-2 text-sm text-slate-400">
+                        <p class="relative mt-2 text-sm text-slate-400">
                             {{ $countryGap >= 0 ? 'Above' : 'Below' }}
                             national benchmark
                         </p>
 
                     @else
 
-                        <p class="mt-4 text-sm font-semibold text-slate-400">
+                        <p class="relative mt-4 text-sm font-semibold text-slate-400">
                             Unavailable
                         </p>
 
@@ -534,9 +538,9 @@
 
                 </div>
 
-                <div class="group rounded-2xl border border-slate-700 bg-slate-900 p-6 transition hover:border-yellow-400/40">
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-yellow-400/40 hover:shadow-xl hover:shadow-black/30">
 
-                    <div class="flex items-start justify-between">
+                    <div class="relative flex items-start justify-between">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                             Defined capabilities
                         </p>
@@ -547,7 +551,7 @@
                         </div>
                     </div>
 
-                    <p class="mt-3 text-4xl font-bold">
+                    <p class="relative mt-3 text-4xl font-bold tracking-tight">
                         {{ $definedCapabilityCount }}
 
                         <span class="text-lg text-slate-500">
@@ -555,7 +559,7 @@
                         </span>
                     </p>
 
-                    <p class="mt-2 text-sm text-slate-400">
+                    <p class="relative mt-2 text-sm text-slate-400">
                         At maturity Level 3 or above
                     </p>
 
@@ -564,11 +568,11 @@
             </div>
 
             {{-- Strategic insights --}}
-            <div class="mt-8 border-t border-slate-800 pt-8">
+            <div class="mt-8 border-t border-slate-800/80 pt-8">
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 
-                    <div class="rounded-2xl bg-slate-900 p-5">
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-900 p-5 transition hover:border-green-400/30">
 
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                             Strongest strategic capability
@@ -586,7 +590,7 @@
 
                     </div>
 
-                    <div class="rounded-2xl bg-slate-900 p-5">
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-900 p-5 transition hover:border-red-400/30">
 
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                             Largest transformation risk
@@ -612,13 +616,13 @@
 
                     </div>
 
-                    <div class="rounded-2xl bg-slate-900 p-5">
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-900 p-5 transition hover:border-yellow-400/30">
 
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                             Maturity consistency
                         </p>
 
-                        <p class="mt-3 text-2xl font-bold">
+                        <p class="mt-3 text-2xl font-bold tracking-tight">
                             {{ number_format($maturitySpread, 1) }}
 
                             <span class="text-sm font-medium text-slate-500">
@@ -650,16 +654,21 @@
         <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
             {{-- Radar chart --}}
-            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div class="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.25)] transition hover:shadow-[0_1px_2px_rgba(15,23,42,0.05),0_28px_48px_-28px_rgba(15,23,42,0.3)]">
 
-                <div>
-                    <h2 class="text-xl font-bold text-slate-950">
-                        AI Capability Landscape
-                    </h2>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-50 text-yellow-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2l3 7 7 1-5.5 5 1.5 7-6-3.5L6 22l1.5-7L2 10l7-1 3-7z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-950">
+                            AI Capability Landscape
+                        </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
-                        Overall shape and balance across assessed capabilities.
-                    </p>
+                        <p class="mt-0.5 text-sm text-slate-500">
+                            Overall shape and balance across assessed capabilities.
+                        </p>
+                    </div>
                 </div>
 
                 <div class="mt-6" style="height: 360px;">
@@ -669,16 +678,21 @@
             </div>
 
             {{-- Ranked horizontal bar chart --}}
-            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div class="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.25)] transition hover:shadow-[0_1px_2px_rgba(15,23,42,0.05),0_28px_48px_-28px_rgba(15,23,42,0.3)]">
 
-                <div>
-                    <h2 class="text-xl font-bold text-slate-950">
-                        Capability Ranking
-                    </h2>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-950">
+                            Capability Ranking
+                        </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
-                        Assessed dimensions ranked from strongest to weakest.
-                    </p>
+                        <p class="mt-0.5 text-sm text-slate-500">
+                            Assessed dimensions ranked from strongest to weakest.
+                        </p>
+                    </div>
                 </div>
 
                 <div class="mt-6" style="height: 320px;">
@@ -723,9 +737,9 @@
 <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
     {{-- Strategic strengths --}}
-    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.25)]">
 
-        <div class="border-b border-slate-200 px-7 py-6">
+        <div class="border-b border-slate-200/80 bg-gradient-to-b from-green-50/40 to-transparent px-7 py-6">
 
             <div class="flex items-start justify-between gap-4">
 
@@ -734,7 +748,7 @@
                         Strategic Strengths
                     </p>
 
-                    <h2 class="mt-2 text-2xl font-bold text-slate-950">
+                    <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
                         Best-Performing Capabilities
                     </h2>
 
@@ -743,7 +757,7 @@
                     </p>
                 </div>
 
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-100 text-green-700">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-green-100 to-green-50 text-green-700 shadow-sm">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -772,11 +786,11 @@
                     $strengthRank = $loop->iteration;
                 @endphp
 
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-green-200 hover:bg-green-50/30">
+                <article class="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50/40 hover:shadow-md">
 
                     <div class="flex items-start gap-4">
 
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white shadow-sm transition group-hover:bg-green-600">
                             {{ $strengthRank }}
                         </div>
 
@@ -803,7 +817,7 @@
                             <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-200">
 
                                 <div
-                                    class="h-full rounded-full bg-green-500"
+                                    class="h-full rounded-full bg-gradient-to-r from-green-500 to-green-400 shadow-[0_0_8px_rgba(34,197,94,0.4)] transition-all duration-700 ease-out"
                                     style="width: {{ min(100, max(0, $score)) }}%;"
                                 ></div>
 
@@ -840,9 +854,9 @@
     </div>
 
     {{-- Improvement priorities --}}
-    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.25)]">
 
-        <div class="border-b border-slate-200 px-7 py-6">
+        <div class="border-b border-slate-200/80 bg-gradient-to-b from-red-50/40 to-transparent px-7 py-6">
 
             <div class="flex items-start justify-between gap-4">
 
@@ -851,7 +865,7 @@
                         Improvement Priorities
                     </p>
 
-                    <h2 class="mt-2 text-2xl font-bold text-slate-950">
+                    <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
                         Capabilities Requiring Action
                     </h2>
 
@@ -860,7 +874,7 @@
                     </p>
                 </div>
 
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-700">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-100 to-red-50 text-red-700 shadow-sm">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -900,11 +914,11 @@
                     }
                 @endphp
 
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <article class="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50/30 hover:shadow-md">
 
                     <div class="flex items-start gap-4">
 
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white shadow-sm">
                             {{ $priorityRank }}
                         </div>
 
@@ -937,7 +951,7 @@
                             <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-200">
 
                                 <div
-                                    class="h-full rounded-full bg-red-500"
+                                    class="h-full rounded-full bg-gradient-to-r from-red-500 to-red-400 shadow-[0_0_8px_rgba(239,68,68,0.4)] transition-all duration-700 ease-out"
                                     style="width: {{ min(100, max(0, $score)) }}%;"
                                 ></div>
 
@@ -976,10 +990,10 @@
 </section>
 
    {{-- Detailed capability breakdown --}}
-<section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+<section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.25)]">
 
     {{-- Section heading --}}
-    <div class="border-b border-slate-200 px-7 py-6 md:px-8">
+    <div class="border-b border-slate-200/80 bg-slate-50/60 px-7 py-6 md:px-8">
 
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
@@ -988,7 +1002,7 @@
                     Capability Analysis
                 </p>
 
-                <h2 class="mt-2 text-2xl font-bold text-slate-950">
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
                     Detailed Assessment Results
                 </h2>
 
@@ -997,7 +1011,7 @@
                 </p>
             </div>
 
-            <div class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
+            <div class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
                 <span class="h-2 w-2 rounded-full bg-yellow-400"></span>
 
                 {{ $rankedDimensionScores->count() }}
@@ -1009,7 +1023,7 @@
     </div>
 
     {{-- Capability table --}}
-    <div class="divide-y divide-slate-200">
+    <div class="divide-y divide-slate-100">
 
         @foreach($rankedDimensionScores as $dimension => $score)
 
@@ -1020,26 +1034,31 @@
                     $statusLabel = 'Critical';
                     $statusClass = 'bg-red-100 text-red-700';
                     $progressClass = 'bg-red-500';
+                    $edgeClass = 'group-hover:border-l-red-400';
                 } elseif ($score < 40) {
                     $statusLabel = 'Needs attention';
                     $statusClass = 'bg-orange-100 text-orange-700';
                     $progressClass = 'bg-orange-500';
+                    $edgeClass = 'group-hover:border-l-orange-400';
                 } elseif ($score < 60) {
                     $statusLabel = 'Developing';
                     $statusClass = 'bg-yellow-100 text-yellow-700';
                     $progressClass = 'bg-yellow-400';
+                    $edgeClass = 'group-hover:border-l-yellow-400';
                 } elseif ($score < 80) {
                     $statusLabel = 'Established';
                     $statusClass = 'bg-blue-100 text-blue-700';
                     $progressClass = 'bg-blue-500';
+                    $edgeClass = 'group-hover:border-l-blue-400';
                 } else {
                     $statusLabel = 'Advanced';
                     $statusClass = 'bg-green-100 text-green-700';
                     $progressClass = 'bg-green-500';
+                    $edgeClass = 'group-hover:border-l-green-400';
                 }
             @endphp
 
-            <article class="px-7 py-6 transition hover:bg-slate-50 md:px-8">
+            <article class="group border-l-4 border-l-transparent px-7 py-6 transition-all duration-200 hover:bg-slate-50 {{ $edgeClass }} md:px-8">
 
                 <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_180px_130px] lg:items-center">
 
@@ -1107,7 +1126,7 @@
                         <div class="h-2.5 overflow-hidden rounded-full bg-slate-100">
 
                             <div
-                                class="h-full rounded-full {{ $progressClass }}"
+                                class="h-full rounded-full {{ $progressClass }} transition-all duration-700 ease-out"
                                 style="width: {{ min(100, max(0, $score)) }}%;"
                             ></div>
 
@@ -1118,7 +1137,7 @@
                     {{-- Score --}}
                     <div class="flex items-baseline lg:justify-end">
 
-                        <span class="text-3xl font-bold text-slate-950">
+                        <span class="text-3xl font-bold tracking-tight text-slate-950">
                             {{ number_format($score, 1) }}
                         </span>
 
@@ -1138,431 +1157,8 @@
 
 </section>
 
-{{-- AI Executive Summary --}}
-@php
-    $aiAnalysis = null;
 
-    if (!empty($assessment->ai_executive_summary)) {
-        $decoded = json_decode($assessment->ai_executive_summary, true);
 
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $aiAnalysis = $decoded;
-        }
-    }
-
-    // Related roadmap actions for the priority risk dimension, so the AI card
-    // links directly to what's already in the roadmap below instead of
-    // floating as an isolated statement.
-    $relatedActionCount = 0;
-
-    if ($aiAnalysis && !empty($aiAnalysis['priority_risk']['dimension']) && $roadmapActionCount) {
-        $relatedActionCount = $roadmapActions
-            ->filter(function ($action) use ($aiAnalysis) {
-                return !empty($action['dimension'])
-                    && strcasecmp(
-                        trim($action['dimension']),
-                        trim($aiAnalysis['priority_risk']['dimension'])
-                    ) === 0;
-            })
-            ->count();
-    }
-
-    // Staleness: if the assessment was recalculated after the AI summary
-    // was generated, the interpretation may no longer match the numbers above it.
-    $summaryGeneratedAt = $assessment->ai_summary_generated_at ?? null;
-
-    $summaryIsStale = $summaryGeneratedAt
-        && $assessment->updated_at
-        && $assessment->updated_at->greaterThan($summaryGeneratedAt);
-@endphp
-
-<section class="mt-10 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-
-    <div class="flex flex-wrap items-start justify-between gap-6">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-yellow-600">
-AI-POWERED READINESS INSIGHTS            </p>
-
-            <h2 class="mt-2 text-2xl font-bold text-slate-900">
-                AI Readiness Analysis
-            </h2>
-
-            <p class="mt-2 text-slate-500">
-Strategic insights based on your organization's assessment results.            </p>
-        </div>
-
-        <div class="flex flex-col items-end gap-2">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-4 py-2 text-xs font-semibold text-yellow-700">
-                <span class="relative flex h-2 w-2">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-500 opacity-75"></span>
-                    <span class="relative inline-flex h-2 w-2 rounded-full bg-yellow-600"></span>
-                </span>
-                AI Generated
-            </span>
-
-            <div class="flex items-center gap-3">
-                @if($summaryGeneratedAt)
-                    <span class="text-xs text-slate-400">
-                        Generated {{ $summaryGeneratedAt->diffForHumans() }}
-                    </span>
-                @endif
-
-                
-            </div>
-        </div>
-    </div>
-
-   @if($aiAnalysis)
-
-    <div id="ai-summary-results">
-        @include('assessments.partials.ai-summary-results')
-    </div>
-
-@else
-
-        <div class="mt-8 flex flex-col items-start gap-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-start gap-3">
-                <span class="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-yellow-100 text-yellow-700">
-                    <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
-                    </svg>
-                </span>
-                <p class="text-sm leading-6 text-slate-600">
-                    Generate an AI strategic interpretation of your assessment results.
-                </p>
-            </div>
-
-            <form method="POST"
-                  action="{{ route('assessment.generate-ai-summary', $assessment) }}"
-                  class="flex-none"
-                  data-ai-form>
-                @csrf
-
-                <button type="submit"
-                        data-ai-submit
-                        class="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70">
-                    <span data-ai-label>Generate Strategic Analysis</span>
-                </button>
-            </form>
-        </div>
-
-    @endif
-
-    @if(session('error'))
-        <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
-
-</section>
-@if($assessment->engagement_type === 'transformation')
-    {{-- Personalized, AI-generated transformation roadmap --}}
-@if($assessment->transformation_status !== 'roadmap_ready')
-
-<section id="roadmap" class="scroll-mt-24 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-            <div class="flex flex-col gap-5 border-b border-slate-200 bg-slate-950 px-6 py-7 text-white md:flex-row md:items-center md:justify-between md:px-8">
-
-                <div>
-                   <p class="text-sm font-semibold uppercase tracking-wider text-yellow-400">
-                        @if($roadmapActionCount)
-                            AI-Generated Action Plan
-                        @else
-                            Personalized Roadmap
-                        @endif
-                    </p>
-
-                    <h2 class="mt-2 text-2xl font-bold">
-                        @if($roadmapActionCount)
-                            Priority Transformation Roadmap
-                        @else
-                            Build Your Roadmap
-                        @endif
-                    </h2>
-                </div>
-
-                <span class="inline-flex w-fit rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950">
-                    @if($roadmapActionCount)
-                        {{ $roadmapActionCount }} {{ $roadmapActionCount === 1 ? 'action' : 'actions' }}
-                    @else
-                        Not generated yet
-                    @endif
-                </span>
-
-            </div>
-
-            {{-- Slightly tighter bottom padding than before — the card was leaving a
-                 large empty gap right above the footer once the roadmap results were
-                 collapsed/short. --}}
-            <div class="space-y-6 p-6 md:px-8 md:pt-8 md:pb-6">
-
-                @if(session('roadmap_error'))
-                    <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                            !
-                        </div>
-                        <p class="text-sm leading-6 text-red-700">
-                            {{ session('roadmap_error') }}
-                        </p>
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-                        <p class="text-sm font-semibold text-red-700">
-                            Please fix the following before generating your roadmap:
-                        </p>
-                        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-red-700">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                @if($roadmapIsStale)
-                    <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
-                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">
-                            !
-                        </div>
-                        <p class="text-sm leading-6 text-amber-800">
-                            <span class="font-semibold">This assessment was updated</span> after this roadmap was generated. Consider regenerating it so the actions reflect your current scores.
-                        </p>
-                    </div>
-                @endif
-
-                @if($roadmapData && $roadmapActionCount)
-
-                    {{-- Inputs recap + edit --}}
-                    <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
-
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
-                                🎯 Target: {{ $roadmapInputs['target_level_label'] ?? '—' }}
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
-                                💰 Budget: {{ $roadmapInputs['budget'] ?? '—' }}
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
-                                ⏱ Timeline: {{ $roadmapInputs['timeline'] ?? '—' }}
-                            </span>
-                            @if(!empty($roadmapInputs['focus_areas']))
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200">
-                                    🔍 Focus: {{ implode(', ', $roadmapInputs['focus_areas']) }}
-                                </span>
-                            @endif
-                        </div>
-
-                        <button type="button" id="toggle-roadmap-form"
-                            class="flex-none text-xs font-bold text-yellow-700 transition hover:underline">
-                            Edit inputs &amp; regenerate
-                        </button>
-                    </div>
-
-                    @if(!empty($roadmapData['summary']))
-                        <p class="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
-                            {{ $roadmapData['summary'] }}
-                        </p>
-                    @endif
-
-                @endif
-
-                {{-- Planning questionnaire — visible by default until a roadmap
-                     exists, then tucked behind "Edit inputs & regenerate". It also
-                     re-opens automatically if the previous submission had a
-                     validation error or the AI call failed, so corrections are
-                     visible instead of hidden behind the toggle. --}}
-                <div id="roadmap-planning-form" class="{{ ($roadmapActionCount && !$roadmapFormHasIssue) ? 'hidden' : '' }}">
-
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                @if($assessment->transformation_status === 'planning')
-                                <h3 class="text-lg font-bold text-slate-900">
-                                    Tell us what you're aiming for
-                                </h3>
-                                @elseif($assessment->transformation_status === 'submitted')
-
-    <div class="rounded-2xl border border-yellow-200 bg-yellow-50 p-8 text-center">
-
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-yellow-400 font-bold text-slate-950">
-            ✓
-        </div>
-
-        <p class="mt-5 text-xs font-bold uppercase tracking-wider text-yellow-700">
-            Transformation Roadmap
-        </p>
-
-        <h3 class="mt-2 text-2xl font-bold text-slate-950">
-            Submitted for expert review
-        </h3>
-
-        <p class="mx-auto mt-3 max-w-2xl leading-7 text-slate-600">
-            Your assessment findings and transformation priorities have been
-            submitted to Yellomind. A consultant will review your readiness
-            results, target maturity, timeline, investment capacity and
-            strategic priorities before preparing your transformation roadmap.
-        </p>
-
-        <div class="mx-auto mt-6 max-w-xl rounded-xl border border-yellow-200 bg-white p-4">
-            <p class="text-sm font-semibold text-slate-900">
-                Your request is waiting for consultant review.
-            </p>
-
-            <p class="mt-1 text-sm text-slate-500">
-                You can return to this page at any time to check its status.
-            </p>
-        </div>
-
-    </div>
-
-@endif
-                                <p class="mt-1 text-sm text-slate-500">
-                                    A few quick questions so the AI can tailor the roadmap to your ambition, budget and timeline — built on top of your assessment results. Note that very ambitious targets on a tight budget or short timeline may be flagged as unrealistic — extend one of those or pick a closer target level.
-                                </p>
-                            </div>
-
-                            <span class="inline-flex flex-none items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-bold text-yellow-400">
-                                Current: Level {{ $currentLevelValue }}{{ $maturityLevel ? ' — ' . ($maturityLevel->label ?? $maturityLevel->name) : '' }}
-                            </span>
-                        </div>
-
-                        <form method="POST"
-      action="{{ route('assessment.roadmap.preferences', $assessment) }}"
-      class="mt-6">
-    @csrf
-
-                            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
-
-                                {{-- Target level --}}
-                                <div>
-                                    <label for="target_level" class="block text-sm font-semibold text-slate-900">
-                                        Target maturity level
-                                    </label>
-                                    <select name="target_level" id="target_level" required
-                                        class="mt-2 w-full rounded-xl border {{ $errors->has('target_level') ? 'border-red-400' : 'border-slate-300' }} bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none">
-                                        <option value="" disabled {{ empty(old('target_level', $roadmapInputs['target_level'] ?? null)) ? 'selected' : '' }}>Select a level</option>
-                                        @foreach($targetLevelOptions as $option)
-                                            <option value="{{ $option->level }}" {{ old('target_level', $roadmapInputs['target_level'] ?? null) == $option->level ? 'selected' : '' }}>
-                                                Level {{ $option->level }}{{ ($option->label ?? $option->name) ? ' — ' . ($option->label ?? $option->name) : '' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('target_level')
-                                        <p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                {{-- Budget --}}
-                                <div>
-                                    <label for="budget" class="block text-sm font-semibold text-slate-900">
-                                        Budget range
-                                    </label>
-                                    @php
-                                        $budgetOptions = [
-                                            'Under $10,000',
-                                            '$10,000 - $50,000',
-                                            '$50,000 - $200,000',
-                                            '$200,000+',
-                                            'Prefer not to say',
-                                        ];
-                                    @endphp
-                                    <select name="budget" id="budget" required
-                                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none">
-                                        <option value="" disabled {{ empty(old('budget', $roadmapInputs['budget'] ?? null)) ? 'selected' : '' }}>Select a range</option>
-                                        @foreach($budgetOptions as $budgetOption)
-                                            <option value="{{ $budgetOption }}" {{ old('budget', $roadmapInputs['budget'] ?? null) === $budgetOption ? 'selected' : '' }}>
-                                                {{ $budgetOption }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                {{-- Timeline --}}
-                                <div>
-                                    <label for="timeline" class="block text-sm font-semibold text-slate-900">
-                                        Timeline horizon
-                                    </label>
-                                    @php
-                                        $timelineOptions = ['3 months', '6 months', '12 months', '18-24 months'];
-                                    @endphp
-                                    <select name="timeline" id="timeline" required
-                                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none">
-                                        <option value="" disabled {{ empty(old('timeline', $roadmapInputs['timeline'] ?? null)) ? 'selected' : '' }}>Select a timeline</option>
-                                        @foreach($timelineOptions as $timelineOption)
-                                            <option value="{{ $timelineOption }}" {{ old('timeline', $roadmapInputs['timeline'] ?? null) === $timelineOption ? 'selected' : '' }}>
-                                                {{ $timelineOption }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                            </div>
-
-                            {{-- Optional focus areas --}}
-                            <div class="mt-5">
-                                <label class="block text-sm font-semibold text-slate-900">
-                                    Focus areas <span class="font-normal text-slate-400">(optional, pick up to 3)</span>
-                                </label>
-                                <div class="mt-2 flex flex-wrap gap-2" id="focus-area-group">
-                                    @foreach($focusAreaOptions as $focusOption)
-                                        @php
-                                            $isChecked = in_array($focusOption, old('focus_areas', $roadmapInputs['focus_areas'] ?? []), true);
-                                        @endphp
-                                        <label class="focus-chip inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition {{ $isChecked ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : 'border-slate-200 bg-white text-slate-600 hover:border-yellow-300' }}">
-                                            <input type="checkbox" name="focus_areas[]" value="{{ $focusOption }}" class="hidden focus-checkbox" {{ $isChecked ? 'checked' : '' }}>
-                                            {{ $focusOption }}
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div class="mt-6 flex flex-wrap items-center justify-end gap-3">
-
-                                @if($roadmapActionCount)
-                                    <button type="button" id="cancel-roadmap-form"
-                                        class="inline-flex items-center rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 transition hover:bg-white">
-                                        Cancel
-                                    </button>
-                                @endif
-
-                               <button type="submit"
-        class="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
-    <span>Continue to Payment</span>
-
-    <svg
-        class="h-4 w-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="2"
-    >
-        <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M5 12h14m-6-6 6 6-6 6"
-        />
-    </svg>
-</button>
-
-                            </div>
-
-                                               </form>
-
-                    </div>
-
-                </div>
-
-                <div id="roadmap-results">
-                    @include('assessments.partials.roadmap-results')
-                </div>
-
-            </div>
-
-    </section>
-    @endif
-@else
 
     {{-- =====================================================
          SELF-ASSESSMENT → TRANSFORMATION UPGRADE
@@ -1570,7 +1166,7 @@ Strategic insights based on your organization's assessment results.            <
 
    <section
     id="roadmap"
-    class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-sm"
+    class="overflow-hidden rounded-3xl border border-slate-200/70 bg-slate-950 text-white shadow-[0_24px_60px_-24px_rgba(2,6,23,0.55)] ring-1 ring-white/5"
 >
     <div class="px-6 py-8 md:px-8 md:py-10">
 
@@ -1579,64 +1175,84 @@ Strategic insights based on your organization's assessment results.            <
             {{-- =====================================================
                  NO TRANSFORMATION REQUEST YET
             ====================================================== --}}
-            @if(empty($assessment->transformation_status))
+@if(
+    empty($assessment->transformation_status)
+    && !$assessment->roadmapPreference
+)
+                <div class="relative w-full overflow-hidden rounded-2xl border border-yellow-400/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-8 shadow-2xl shadow-yellow-400/5 md:p-10">
 
-                <div class="max-w-3xl">
+    <div class="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-yellow-400/10 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-amber-500/5 blur-3xl"></div>
 
-                    <p class="text-sm font-semibold uppercase tracking-wider text-yellow-400">
-                        From Diagnosis to Action
-                    </p>
+    <div class="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
 
-                    <h2 class="mt-3 text-2xl font-bold md:text-3xl">
-                        Ready to move from diagnosis to action?
-                    </h2>
+        <div class="max-w-3xl">
 
-                    <p class="mt-4 max-w-2xl leading-7 text-slate-300">
-                        Turn your assessment findings into a structured transformation
-                        roadmap aligned with your priorities, target maturity,
-                        timeline and investment capacity.
-                    </p>
+            <p class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-yellow-400">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+                From Diagnosis to Action
+            </p>
 
-                    <p class="mt-3 text-sm leading-6 text-slate-400">
-                        Your completed assessment will be reused — you will not need
-                        to take the assessment again.
-                    </p>
+            <h2 class="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+                Ready to move from diagnosis to action?
+            </h2>
 
-                </div>
+            <p class="mt-4 max-w-2xl leading-7 text-slate-300">
+                Turn your assessment findings into a structured transformation
+                roadmap aligned with your priorities, target maturity,
+                timeline and investment capacity.
+            </p>
 
-                <div class="shrink-0">
+            <div class="mt-5 flex items-start gap-2 text-sm leading-6 text-slate-400">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-yellow-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Your completed assessment will be reused — you will not need to take the assessment again.</span>
+            </div>
 
-                    <form
-                        method="POST"
-                        action="{{ route('transformation.from-assessment', $assessment) }}"
-                    >
-                        @csrf
+        </div>
 
-                        <button
-                            type="submit"
-                            class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
-                        >
-                            Build Your Transformation Roadmap
-                            <span class="ml-2">→</span>
-                        </button>
+        <div class="shrink-0">
 
-                    </form>
+            <form
+                method="POST"
+                action="{{ route('transformation.from-assessment', $assessment) }}"
+            >
+                @csrf
 
-                </div>
+                <button
+                    type="submit"
+                    class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 px-7 py-3.5 font-bold text-slate-950 shadow-lg shadow-yellow-400/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-yellow-400/30 md:w-auto"
+                >
+                    Build Your Transformation Roadmap
+                    <span class="transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true">→</span>
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
 
 
             {{-- =====================================================
                  TRANSFORMATION PLANNING STARTED
             ====================================================== --}}
-            @elseif($assessment->transformation_status === 'planning')
-
+@elseif(
+    $assessment->payment_status !== 'paid'
+    && $assessment->roadmapPreference
+)
                 <div class="max-w-3xl">
 
                     <p class="text-sm font-semibold uppercase tracking-wider text-yellow-400">
                         Transformation Roadmap
                     </p>
 
-                    <h2 class="mt-3 text-2xl font-bold md:text-3xl">
+                    <h2 class="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
                         Continue building your transformation brief
                     </h2>
 
@@ -1646,17 +1262,14 @@ Strategic insights based on your organization's assessment results.            <
                         before submitting your request for expert review.
                     </p>
 
-                    <p class="mt-3 text-sm leading-6 text-slate-400">
-                        Your progress has been saved.
-                    </p>
+                    
 
                 </div>
 
                 <div class="shrink-0">
 
                     <a
-                        href="{{ route('assessment.results', $assessment) }}#roadmap-builder"
-                        class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
+href="{{ route('transformation.brief', $assessment) }}"                        class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-3 font-bold text-slate-950 shadow-md shadow-yellow-400/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-yellow-400/30"
                     >
                         Continue Transformation Plan
                         <span class="ml-2">→</span>
@@ -1676,7 +1289,7 @@ Strategic insights based on your organization's assessment results.            <
                         Transformation Roadmap
                     </p>
 
-                    <h2 class="mt-3 text-2xl font-bold md:text-3xl">
+                    <h2 class="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
                         Your transformation request is under review
                     </h2>
 
@@ -1695,7 +1308,7 @@ Strategic insights based on your organization's assessment results.            <
 
                     <a
                         href="{{ route('assessment.transformation.submitted', $assessment) }}"
-                        class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
+                        class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-3 font-bold text-slate-950 shadow-md shadow-yellow-400/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-yellow-400/30"
                     >
                         View Request Status
                         <span class="ml-2">→</span>
@@ -1715,7 +1328,7 @@ Strategic insights based on your organization's assessment results.            <
                         Transformation Roadmap
                     </p>
 
-                    <h2 class="mt-3 text-2xl font-bold md:text-3xl">
+                    <h2 class="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
                         Expert review in progress
                     </h2>
 
@@ -1734,7 +1347,7 @@ Strategic insights based on your organization's assessment results.            <
 
                     <a
                         href="{{ route('assessment.transformation.submitted', $assessment) }}"
-                        class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
+                        class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-3 font-bold text-slate-950 shadow-md shadow-yellow-400/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-yellow-400/30"
                     >
                         View Request Status
                         <span class="ml-2">→</span>
@@ -1754,7 +1367,7 @@ Strategic insights based on your organization's assessment results.            <
                         Transformation Roadmap
                     </p>
 
-                    <h2 class="mt-3 text-2xl font-bold md:text-3xl">
+                    <h2 class="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
                         Your Transformation Roadmap is ready
                     </h2>
 
@@ -1774,7 +1387,7 @@ Strategic insights based on your organization's assessment results.            <
 
                     <a
                         href="{{ route('assessment.results', $assessment) }}#final-roadmap"
-                        class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
+                        class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-3 font-bold text-slate-950 shadow-md shadow-yellow-400/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-yellow-400/30"
                     >
                         View Transformation Roadmap
                         <span class="ml-2">→</span>
@@ -1794,7 +1407,7 @@ Strategic insights based on your organization's assessment results.            <
                         Transformation Roadmap
                     </p>
 
-                    <h2 class="mt-3 text-2xl font-bold md:text-3xl">
+                    <h2 class="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
                         Track your transformation request
                     </h2>
 
@@ -1808,7 +1421,7 @@ Strategic insights based on your organization's assessment results.            <
 
                     <a
                         href="{{ route('assessment.transformation.submitted', $assessment) }}"
-                        class="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-yellow-300"
+                        class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-3 font-bold text-slate-950 shadow-md shadow-yellow-400/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-yellow-400/30"
                     >
                         View Request Status
                         <span class="ml-2">→</span>
@@ -1823,9 +1436,6 @@ Strategic insights based on your organization's assessment results.            <
     </div>
 </section>
 
-@endif
-
-
 {{-- =====================================================
      FINAL EXPERT-REVIEWED TRANSFORMATION ROADMAP
 ====================================================== --}}
@@ -1838,7 +1448,7 @@ Strategic insights based on your organization's assessment results.            <
 
     <section
         id="final-roadmap"
-        class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+        class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(15,23,42,0.25)]"
     >
 
    @php
@@ -1847,16 +1457,18 @@ Strategic insights based on your organization's assessment results.            <
 @endphp
 
 {{-- Header --}}
-<div class="border-b border-slate-800 bg-slate-950 px-6 py-8 text-white md:px-8">
+<div class="relative overflow-hidden border-b border-slate-800 bg-slate-950 px-6 py-8 text-white md:px-8">
 
-    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-yellow-400/10 blur-3xl"></div>
+
+    <div class="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
 
         <div>
             <p class="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-400">
                 Expert-Reviewed Transformation Plan
             </p>
 
-            <h2 class="mt-2 text-3xl font-bold">
+            <h2 class="mt-2 text-3xl font-bold tracking-tight">
                 Your Transformation Roadmap
             </h2>
 
@@ -1873,7 +1485,7 @@ Strategic insights based on your organization's assessment results.            <
                 ✓ Expert Reviewed
             </span>
 
-            <span class="inline-flex items-center rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950">
+            <span class="inline-flex items-center rounded-full bg-gradient-to-r from-yellow-400 to-amber-400 px-4 py-2 text-sm font-bold text-slate-950 shadow-sm">
                 {{ $finalInitiatives->count() }}
                 {{ $finalInitiatives->count() === 1 ? 'Initiative' : 'Initiatives' }}
             </span>
@@ -1886,11 +1498,11 @@ Strategic insights based on your organization's assessment results.            <
 
 
 {{-- Roadmap overview --}}
-<div class="border-b border-slate-200 bg-slate-50 px-6 py-6 md:px-8">
+<div class="border-b border-slate-200/80 bg-slate-50/60 px-6 py-6 md:px-8">
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
                 Status
             </p>
@@ -1900,17 +1512,17 @@ Strategic insights based on your organization's assessment results.            <
             </p>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
                 Initiatives
             </p>
 
-            <p class="mt-2 text-2xl font-bold text-slate-950">
+            <p class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
                 {{ $finalInitiatives->count() }}
             </p>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
                 Finalized
             </p>
@@ -1920,7 +1532,7 @@ Strategic insights based on your organization's assessment results.            <
             </p>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
                 Delivery
             </p>
@@ -1943,7 +1555,7 @@ Strategic insights based on your organization's assessment results.            <
             Implementation Priorities
         </p>
 
-        <h3 class="mt-2 text-2xl font-bold text-slate-950">
+        <h3 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
             Prioritized Initiatives
         </h3>
 
@@ -1954,7 +1566,7 @@ Strategic insights based on your organization's assessment results.            <
 
     @forelse($finalInitiatives as $initiative)
 
-        <article class="rounded-2xl border border-slate-200 bg-white p-6">
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
 
             <div class="flex items-start gap-4">
 
@@ -1973,7 +1585,7 @@ Strategic insights based on your organization's assessment results.            <
                                 </p>
                             @endif
 
-                            <h4 class="mt-1 text-xl font-bold text-slate-950">
+                            <h4 class="mt-1 text-xl font-bold tracking-tight text-slate-950">
                                 {{ $initiative->title }}
                             </h4>
                         </div>
@@ -2077,7 +1689,7 @@ Strategic insights based on your organization's assessment results.            <
     <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
         @if($initiative->phase)
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
                 <p class="text-xs font-bold uppercase text-slate-400">
                     Phase
                 </p>
@@ -2088,7 +1700,7 @@ Strategic insights based on your organization's assessment results.            <
         @endif
 
         @if($initiative->investment)
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
                 <p class="text-xs font-bold uppercase text-slate-400">
                     Investment
                 </p>
@@ -2099,7 +1711,7 @@ Strategic insights based on your organization's assessment results.            <
         @endif
 
         @if($initiative->effort)
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
                 <p class="text-xs font-bold uppercase text-slate-400">
                     Effort
                 </p>
@@ -2110,7 +1722,7 @@ Strategic insights based on your organization's assessment results.            <
         @endif
 
         @if($initiative->impact)
-            <div class="rounded-xl bg-slate-50 p-4">
+            <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
                 <p class="text-xs font-bold uppercase text-slate-400">
                     Impact
                 </p>
@@ -2148,7 +1760,7 @@ Strategic insights based on your organization's assessment results.            <
 {{-- Standard reference --}}
 @if($initiative->standard_reference)
     <div class="mt-5">
-        <span class="inline-flex rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
+        <span class="inline-flex rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-100">
             {{ $initiative->standard_reference }}
         </span>
     </div>
@@ -2187,14 +1799,14 @@ Strategic insights based on your organization's assessment results.            <
 {{-- Overall Expert Guidance --}}
 @if($finalRoadmap->consultant_notes || $finalRoadmap->risks_dependencies)
 
-    <div class="border-t border-slate-200 bg-slate-50 px-6 py-8 md:px-8">
+    <div class="border-t border-slate-200/80 bg-slate-50/60 px-6 py-8 md:px-8">
 
         <div>
             <p class="text-xs font-bold uppercase tracking-[0.18em] text-yellow-600">
                 Expert Review
             </p>
 
-            <h3 class="mt-2 text-2xl font-bold text-slate-950">
+            <h3 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
 Expert Guidance            </h3>
 
             <p class="mt-2 text-sm leading-6 text-slate-500">
@@ -2205,7 +1817,7 @@ Expert Guidance            </h3>
         <div class="mt-6 grid gap-5 lg:grid-cols-2">
 
             @if($finalRoadmap->consultant_notes)
-                <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
                     <p class="text-sm font-bold text-slate-950">
                         Implementation Guidance
@@ -2218,7 +1830,7 @@ Expert Guidance            </h3>
 
 
             @if($finalRoadmap->risks_dependencies)
-                <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
                     <p class="text-sm font-bold text-slate-950">
                         Risks & Dependencies
@@ -2237,7 +1849,7 @@ Expert Guidance            </h3>
 
 
 {{-- Final roadmap download --}}
-<div class="border-t border-slate-200 bg-white px-6 py-8 md:px-8">
+<div class="border-t border-slate-200/80 bg-white px-6 py-8 md:px-8">
 
     <div class="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-6
                 md:flex-row md:items-center md:justify-between">
@@ -2247,7 +1859,7 @@ Expert Guidance            </h3>
                 Final Deliverable
             </p>
 
-            <h3 class="mt-2 text-xl font-bold text-slate-950">
+            <h3 class="mt-2 text-xl font-bold tracking-tight text-slate-950">
                 Your Expert-Reviewed Transformation Roadmap
             </h3>
 
@@ -2260,8 +1872,8 @@ Expert Guidance            </h3>
         <a
             href="{{ route('assessment.transformation.roadmap.pdf', $assessment) }}"
             class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl
-                   bg-slate-950 px-5 py-3 text-sm font-bold text-white transition
-                   hover:bg-yellow-400 hover:text-slate-950"
+                   bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all duration-200
+                   hover:-translate-y-0.5 hover:bg-yellow-400 hover:text-slate-950 hover:shadow-md"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -2780,7 +2392,7 @@ if (barCanvas) {
 <a href="{{ route('dashboard') }}"
    aria-label="Dashboard"
    title="Back to dashboard"
-   class="fixed left-5 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-lg shadow-slate-900/10 transition-all duration-200 hover:-translate-x-1 hover:border-yellow-300 hover:text-yellow-600 print:hidden">
+   class="fixed left-5 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-lg shadow-slate-900/10 transition-all duration-200 hover:-translate-x-1 hover:scale-105 hover:border-yellow-300 hover:text-yellow-600 hover:shadow-xl print:hidden">
 
     <svg class="h-5 w-5"
          fill="none"
@@ -2800,7 +2412,7 @@ if (barCanvas) {
    aria-label="Back to top"
    title="Back to top"
    id="back-to-top"
-   class="fixed bottom-7 right-7 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 opacity-0 shadow-lg shadow-slate-900/10 transition-all duration-200 pointer-events-none hover:-translate-y-1 hover:border-yellow-300 hover:text-yellow-600 print:hidden">
+   class="fixed bottom-7 right-7 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 opacity-0 shadow-lg shadow-slate-900/10 transition-all duration-200 pointer-events-none hover:-translate-y-1 hover:scale-105 hover:border-yellow-300 hover:text-yellow-600 hover:shadow-xl print:hidden">
 
     <svg class="h-5 w-5"
          fill="none"
@@ -2813,7 +2425,7 @@ if (barCanvas) {
     </svg>
 </a>
 
-<footer class="relative left-1/2 mt-10 w-screen -translate-x-1/2 border-t-4 border-yellow-400 bg-slate-950 text-slate-300 print:hidden">    <div class="relative mx-auto max-w-7xl overflow-hidden px-6 py-10 md:px-8">
+<footer class="relative left-1/2 mt-10 w-screen -translate-x-1/2 border-t-4 border-yellow-400 bg-slate-950 text-slate-300 shadow-[0_-20px_40px_-30px_rgba(0,0,0,0.6)] print:hidden">    <div class="relative mx-auto max-w-7xl overflow-hidden px-6 py-10 md:px-8">
 
         {{-- Subtle decorative glow, same accent color, kept very low-opacity
              so it reads as texture rather than a competing element --}}
@@ -2865,17 +2477,17 @@ if (barCanvas) {
     <div class="mt-4 flex flex-col gap-3 text-sm text-slate-400">
 
         <a href="{{ route('dashboard') }}"
-           class="w-fit transition hover:text-yellow-400">
+           class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400">
             Dashboard
         </a>
 
         <a href="{{ route('assessment.start') }}"
-           class="w-fit transition hover:text-yellow-400">
+           class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400">
             AI Readiness Assessment
         </a>
 
         <a href="{{ route('transformation.start') }}"
-           class="w-fit transition hover:text-yellow-400">
+           class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400">
             Transformation Roadmap
         </a>
 
@@ -2892,17 +2504,17 @@ if (barCanvas) {
     <div class="mt-4 flex flex-col gap-3 text-sm text-slate-400">
 
         <a href="{{ url('/') }}#process"
-           class="w-fit transition hover:text-yellow-400">
+           class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400">
             How it works
         </a>
 
         <a href="{{ url('/') }}#engagements"
-           class="w-fit transition hover:text-yellow-400">
+           class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400">
             Delivery formats
         </a>
 
         <a href="{{ url('/') }}#faq"
-           class="w-fit transition hover:text-yellow-400">
+           class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400">
             FAQ
         </a>
 
@@ -2924,21 +2536,21 @@ if (barCanvas) {
                         href="https://yellomind.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="w-fit transition hover:text-yellow-400"
+                        class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400"
                     >
                         Yellomind Consulting
                     </a>
 
                     <a
                         href="mailto:info@yellomind.com"
-                        class="w-fit transition hover:text-yellow-400"
+                        class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400"
                     >
                         info@yellomind.com
                     </a>
 
                     <a
                         href="mailto:info@yellomind.com?subject=YARA%20Assessment%20Enquiry"
-                        class="w-fit transition hover:text-yellow-400"
+                        class="w-fit transition hover:translate-x-0.5 hover:text-yellow-400"
                     >
                         Speak to Yellomind
                     </a>
