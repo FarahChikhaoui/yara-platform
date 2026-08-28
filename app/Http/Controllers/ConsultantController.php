@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Response;
 use Illuminate\Http\Request;
 use App\Models\Assessment;
 use App\Models\MaturityLevel;
 use App\Services\GroqAIService;
 use Illuminate\Support\Facades\Log;
+use App\Services\AuditLogger;
 use Throwable;
 
 class ConsultantController extends Controller
@@ -185,7 +187,226 @@ $assessment->load([
         'dimensionMaturityLevels'
     ));
 }
+public function generateAiSummary(
+    Request $request,
+    Assessment $assessment,
+    GroqAIService $ai
+) {
+    /*
+     * Only the consultant assigned to this paid
+     * Transformation request may generate the brief.
+     */
+    abort_unless(
+        auth()->user()->role === 'consultant'
+        && $assessment->engagement_type === 'transformation'
+        && $assessment->payment_status === 'paid'
+        && (int) $assessment->assigned_consultant_id === (int) auth()->id(),
+        403
+    );
 
+    abort_unless(
+        $assessment->status === 'completed',
+        404
+    );
+
+    $assessment->load('company');
+
+    $responses = Response::with([
+        'answerOption',
+        'question.dimension',
+    ])
+        ->where('assessment_id', $assessment->id)
+        ->get();
+
+    $dimensionScores = $responses
+    ->filter(function ($response) {
+        return $response->question
+            && $response->question->dimension
+            && $response->answerOption;
+    })
+    ->groupBy(function ($response) {
+        return $response->question->dimension->name;
+    })
+    ->map(function ($group) {
+
+        $weightedScore = 0;
+        $totalWeight = 0;
+
+        foreach ($group as $response) {
+
+            $answerScore = $response->answerOption?->score;
+            $questionWeight = $response->question?->weight ?? 1;
+
+            if ($answerScore === null) {
+                continue;
+            }
+
+            $normalizedScore = (($answerScore - 1) / 3) * 100;
+
+            $weightedScore += $normalizedScore * $questionWeight;
+            $totalWeight += $questionWeight;
+        }
+
+        return $totalWeight > 0
+            ? $weightedScore / $totalWeight
+            : 0;
+    })
+    ->map(fn ($score) => round($score, 1));
+
+    $maturityLevels = MaturityLevel::orderBy('min_score')->get();
+
+    $overallMaturity = $maturityLevels->first(
+        function ($level) use ($assessment) {
+            return $assessment->company_score >= $level->min_score
+                && $assessment->company_score <= $level->max_score;
+        }
+    );
+
+    $assessmentData = [
+        'organization' => $assessment->company?->name,
+        'industry' => $assessment->company?->industry,
+        'country' => $assessment->company?->country,
+
+        'organizational_readiness_score' =>
+            round((float) $assessment->company_score, 1),
+
+        'country_ai_readiness_score' =>
+            $assessment->country_ai_score !== null
+                ? round((float) $assessment->country_ai_score, 1)
+                : null,
+
+        'country_benchmark_year' =>
+            $assessment->country_ai_year,
+
+        'yara_composite_score' =>
+            $assessment->combined_score !== null
+                ? round((float) $assessment->combined_score, 1)
+                : null,
+
+        'overall_maturity' =>
+            $overallMaturity
+                ? ($overallMaturity->label ?? $overallMaturity->name)
+                : null,
+
+        'dimension_scores' =>
+            $dimensionScores->toArray(),
+    ];
+
+    $prompt = <<<PROMPT
+You are the strategic AI analysis engine of YARA, an organizational AI readiness assessment platform.
+
+Your purpose is NOT to summarize or repeat assessment scores.
+Your purpose is to interpret the relationship between the organization's readiness dimensions and turn the assessment into useful strategic decision support.
+
+Use ONLY the supplied YARA assessment data.
+
+STRICT RULES:
+- Never invent facts about the organization.
+- Never invent technologies, projects, budgets, employees, policies, regulations, or business circumstances.
+- Never invent information about the country's AI ecosystem.
+- Treat all supplied YARA scores and maturity levels as authoritative.
+- Do not recalculate the official scores.
+- Base strengths and weaknesses only on the supplied dimension scores.
+- Recommendations must logically follow from the assessment results.
+- Distinguish evidence from interpretation.
+- Avoid generic statements such as "continue improving AI readiness."
+- Do not simply list or repeat all scores.
+- Do not use Markdown.
+- Return ONLY valid JSON.
+- Do not include ```json or code fences.
+- Do not infer that a specific policy, process, technology, control, team or governance mechanism exists or does not exist unless the assessment data explicitly establishes that fact.
+- Use language such as "suggests", "indicates", or "may reflect" when interpreting scores.
+- Do not provide an action plan or roadmap.
+- Do not recommend budgets, timelines or implementation activities.
+- The purpose of this analysis is diagnosis and strategic interpretation only.
+- The readiness_pattern must compare or connect at least two dimensions.
+- Do not simply identify another high or low score.
+
+The headline must be a single sentence (max ~18 words) that states the single most important takeaway from this assessment. It must be specific to this organization's data.
+
+Return EXACTLY this JSON structure:
+
+{
+    "headline": "Single-sentence executive takeaway grounded in the data above.",
+
+    "priority_risk": {
+        "title": "Short descriptive title",
+        "dimension": "Relevant dimension name",
+        "insight": "Explain what the assessment evidence suggests and why this weakness matters strategically."
+    },
+
+    "strategic_strength": {
+        "title": "Short descriptive title",
+        "dimension": "Relevant dimension name",
+        "insight": "Explain what the assessment evidence suggests and how this strength could support future AI development."
+    },
+
+    "readiness_pattern": {
+        "title": "Short descriptive title",
+        "insight": "Identify the most meaningful relationship, imbalance or dependency between multiple readiness dimensions."
+    }
+}
+
+Note: "dimension" values in priority_risk and strategic_strength must exactly match one of the dimension names supplied in dimension_scores below.
+
+ASSESSMENT DATA:
+PROMPT;
+
+    $prompt .= "\n" . json_encode(
+        $assessmentData,
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+    );
+
+    try {
+        $summary = $ai->generate($prompt);
+    } catch (Throwable $e) {
+        Log::error('Consultant AI assessment brief generation failed', [
+            'assessment_id' => $assessment->id,
+            'consultant_id' => auth()->id(),
+            'message' => $e->getMessage(),
+        ]);
+
+        return back()->with(
+            'error',
+            'The AI analysis service is temporarily unavailable. Please try again in a moment.'
+        );
+    }
+
+    $analysis = json_decode($summary, true);
+
+    if (
+        json_last_error() !== JSON_ERROR_NONE ||
+        !is_array($analysis) ||
+        empty($analysis['priority_risk']) ||
+        empty($analysis['strategic_strength']) ||
+        empty($analysis['readiness_pattern'])
+    ) {
+        Log::warning('Consultant AI assessment brief returned unexpected format', [
+            'assessment_id' => $assessment->id,
+            'raw' => $summary ?? null,
+        ]);
+
+        return back()->with(
+            'error',
+            'The AI analysis could not be generated in the expected format. Please try again.'
+        );
+    }
+
+    $assessment->update([
+        'ai_executive_summary' => json_encode(
+            $analysis,
+            JSON_UNESCAPED_UNICODE
+        ),
+        'ai_summary_generated_at' => now(),
+    ]);
+
+    return redirect()
+        ->route('consultant.assessments.review', $assessment)
+        ->with(
+            'success',
+            'AI Assessment Brief generated successfully.'
+        );
+}
 public function generateRoadmap(
     Assessment $assessment,
     GroqAIService $ai
@@ -887,7 +1108,18 @@ if (!$roadmap) {
         'transformation_status' => 'in_review',
         'reviewed_by' => $user->id,
     ]);
-
+AuditLogger::log(
+    'transformation.roadmap_generated',
+    $assessment,
+    'Transformation Roadmap draft generated for consultant review.',
+    [
+        'assessment_id' => $assessment->id,
+        'roadmap_id' => $roadmap->id,
+        'consultant_id' => $user->id,
+        'company_id' => $assessment->company_id,
+        'initiatives_count' => $roadmap->initiatives()->count(),
+    ]
+);
     /*
      * Load initiatives in their recommended order.
      */
@@ -1411,14 +1643,26 @@ $this->authorizeAssignedConsultant($assessment);
      * We use "completed" here so this is clearly different from
      * "in_review", which represents consultant work in progress.
      */
-    $assessment->update([
+   $assessment->update([
     'transformation_status' => 'roadmap_ready',
     'reviewed_by' => $user->id,
     'reviewed_at' => now(),
 ]);
 
-    $roadmap->refresh();
+AuditLogger::log(
+    'transformation.roadmap_finalized',
+    $assessment,
+    'Transformation Roadmap finalized and released to the client.',
+    [
+        'assessment_id' => $assessment->id,
+        'roadmap_id' => $roadmap->id,
+        'consultant_id' => $user->id,
+        'company_id' => $assessment->company_id,
+        'initiatives_count' => $roadmap->initiatives()->count(),
+    ]
+);
 
+$roadmap->refresh();
     /*
      * JSON because finalization will happen without a page reload.
      */

@@ -233,7 +233,6 @@
                                                 type="radio"
                                                 name="answers[{{ $question->id }}]"
                                                 value="{{ $option->id }}"
-                                                required
                                                 class="answer-radio mt-1 h-5 w-5 border-slate-300 text-yellow-500 focus:ring-yellow-400"
                                             >
 
@@ -245,7 +244,10 @@
                                     @endforeach
 
                                 </div>
-
+<div class="question-error mt-4 hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <strong>! Answer required.</strong>
+    Please select an option before viewing your result.
+</div>
                             </section>
 
                         @endforeach
@@ -373,16 +375,16 @@
              * If this question was previously marked as
              * unanswered, remove the warning styling now.
              */
-            card.classList.remove(
-                'border-red-300',
-                'bg-red-50',
-                'ring-2',
-                'ring-red-100'
-            );
+           card.classList.remove(
+    'border-red-300',
+    'bg-red-50',
+    'ring-2',
+    'ring-red-100'
+);
 
+card.querySelector('.question-error').classList.add('hidden');
 
-            updateProgress();
-
+updateProgress();
 
             /*
              * If all questions have now been answered,
@@ -417,16 +419,17 @@
         /*
          * Clear previous warning styling.
          */
-        questionCards.forEach(card => {
+       questionCards.forEach(card => {
 
-            card.classList.remove(
-                'border-red-300',
-                'bg-red-50',
-                'ring-2',
-                'ring-red-100'
-            );
+    card.classList.remove(
+        'border-red-300',
+        'bg-red-50',
+        'ring-2',
+        'ring-red-100'
+    );
 
-        });
+    card.querySelector('.question-error').classList.add('hidden');
+});
 
 
         /*
@@ -438,18 +441,17 @@
                 '.answer-radio:checked'
             );
 
-            if (!checkedAnswer) {
+          if (!checkedAnswer) {
 
-                missingCards.push(card);
+    missingCards.push(card);
 
-                card.classList.add(
-                    'border-red-300',
-                    'bg-red-50',
-                    'ring-2',
-                    'ring-red-100'
-                );
-
-            }
+    card.classList.add(
+        'border-red-300',
+        'ring-2',
+        'ring-red-100'
+    );
+card.querySelector('.question-error').classList.remove('hidden');
+}
 
         });
 

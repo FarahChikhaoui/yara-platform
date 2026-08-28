@@ -429,25 +429,94 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
 
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
 
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">
-                        Previous Assessments
-                    </h2>
+    <div>
+        <h2 class="text-2xl font-bold text-slate-900">
+            Previous Assessments
+        </h2>
 
-                    <p class="mt-1 text-slate-500">
-                        Review your previous assessment submissions and results.
-                    </p>
-                </div>
+        <p class="mt-1 text-slate-500">
+            Review your previous assessment submissions and results.
+        </p>
+    </div>
 
-                @if($assessments->count())
-                    <span class="hidden shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 sm:inline-block">
-                        {{ $assessments->count() }} total
-                    </span>
-                @endif
 
-            </div>
+    <div class="flex items-center gap-3">
+
+        @if($assessments->count())
+            <span class="hidden shrink-0 rounded-full bg-slate-100
+                         px-3 py-1 text-xs font-semibold text-slate-500
+                         sm:inline-block">
+                {{ $assessments->count() }} total
+            </span>
+        @endif
+
+
+        @if($completedAssessments->count() >= 2)
+
+            <a
+                href="{{ route('assessment.comparison') }}"
+                class="group inline-flex shrink-0 items-center gap-2
+                       rounded-xl bg-slate-950 px-4 py-2.5
+                       text-sm font-semibold text-white
+                       shadow-sm transition hover:bg-slate-800"
+            >
+
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    class="h-4 w-4"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M8 7h11m0 0-3-3m3 3-3 3M16 17H5m0 0 3 3m-3-3 3-3"
+                    />
+                </svg>
+
+                Compare Assessments
+
+            </a>
+
+        @endif
+@if($completedAssessments->count() >= 1)
+
+    <a
+        href="{{ route('assessment.simulator') }}"
+        class="group inline-flex shrink-0 items-center gap-2
+               rounded-xl border border-slate-200 bg-white px-4 py-2.5
+               text-sm font-semibold text-slate-700
+               shadow-sm transition
+               hover:border-slate-300 hover:bg-slate-50"
+    >
+
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            class="h-4 w-4"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 19V9m5 10V5m5 14v-7m5 7V3"
+            />
+        </svg>
+
+        Explore Scenarios
+
+    </a>
+
+@endif
+    </div>
+
+</div>
 
             @if($assessments->count())
 

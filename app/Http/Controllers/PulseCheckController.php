@@ -100,9 +100,9 @@ class PulseCheckController extends Controller
             $pulseCheck->id
         )->delete();
 
-        $totalNormalizedScore = 0;
-        $answeredQuestions = 0;
-        $dimensionScores = [];
+       $totalWeightedScore = 0;
+$totalQuestionWeight = 0;
+$dimensionScores = [];
 
         foreach ($questions as $question) {
             $answerOptionId = $validated['answers'][$question->id];
@@ -137,34 +137,37 @@ class PulseCheckController extends Controller
              */
             $normalizedScore = (($selectedOption->score - 1) / 3) * 100;
 
-            $totalNormalizedScore += $normalizedScore;
-            $answeredQuestions++;
+          $questionWeight = (float) $question->weight ?? 1;
 
-            if ($question->dimension_id) {
-                if (!isset($dimensionScores[$question->dimension_id])) {
-                    $dimensionScores[$question->dimension_id] = [
-                        'total' => 0,
-                        'count' => 0,
-                    ];
-                }
+$totalWeightedScore += $normalizedScore * $questionWeight;
+$totalQuestionWeight += $questionWeight;
 
-                $dimensionScores[$question->dimension_id]['total']
-                    += $normalizedScore;
+if ($question->dimension_id) {
 
-                $dimensionScores[$question->dimension_id]['count']++;
-            }
+    if (!isset($dimensionScores[$question->dimension_id])) {
+        $dimensionScores[$question->dimension_id] = [
+            'weighted_score' => 0,
+            'total_weight' => 0,
+        ];
+    }
+
+    $dimensionScores[$question->dimension_id]['weighted_score']
+        += $normalizedScore * $questionWeight;
+
+    $dimensionScores[$question->dimension_id]['total_weight']
+        += $questionWeight;
+}
         }
+       $overallScore = $totalQuestionWeight > 0
+    ? $totalWeightedScore / $totalQuestionWeight
+    : 0;
 
-        $overallScore = $answeredQuestions > 0
-            ? $totalNormalizedScore / $answeredQuestions
+$dimensionAverages = collect($dimensionScores)
+    ->map(function (array $values) {
+        return $values['total_weight'] > 0
+            ? $values['weighted_score'] / $values['total_weight']
             : 0;
-
-        $dimensionAverages = collect($dimensionScores)
-            ->map(function (array $values) {
-                return $values['count'] > 0
-                    ? $values['total'] / $values['count']
-                    : 0;
-            });
+    });
 
         $strongestDimensionId = $dimensionAverages->isNotEmpty()
             ? $dimensionAverages->sortDesc()->keys()->first()

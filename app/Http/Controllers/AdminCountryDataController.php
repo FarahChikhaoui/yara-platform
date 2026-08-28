@@ -6,6 +6,7 @@ use App\Models\BenchmarkDataset;
 use App\Models\CountryAIReadinessScore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\AuditLogger;
 
 class AdminCountryDataController extends Controller
 {
@@ -153,7 +154,15 @@ $activeDataset = $datasets->firstWhere('is_active', true);
                 'is_active' => true,
             ]);
         });
-
+AuditLogger::log(
+    'benchmark.activated',
+    $dataset,
+    "Benchmark dataset {$dataset->year} activated.",
+    [
+        'year' => $dataset->year,
+        'source' => $dataset->source,
+    ]
+);
 
         return redirect()
             ->route('admin.country-data.index')
@@ -556,15 +565,17 @@ public function storeImport(Request $request)
     | If ANY database operation fails, nothing is imported.
     |
     */
+$importedDataset = null;
 
-    try {
+try {
 
-        DB::transaction(function () use (
-            $rows,
-            $year,
-            $source,
-            $shouldActivate
-        ) {
+    DB::transaction(function () use (
+    $rows,
+    $year,
+    $source,
+    $shouldActivate,
+    &$importedDataset
+) {
 
             /*
              * Safety check again INSIDE transaction.
@@ -598,8 +609,7 @@ public function storeImport(Request $request)
             /*
              * Register imported dataset.
              */
-            BenchmarkDataset::create([
-                'name' =>
+$importedDataset = BenchmarkDataset::create([                'name' =>
                     "Government AI Readiness Index {$year}",
 
                 'source' => $source,
@@ -632,7 +642,17 @@ public function storeImport(Request $request)
     | 8. Success
     |--------------------------------------------------------------------------
     */
-
+AuditLogger::log(
+    'benchmark.imported',
+    $importedDataset,
+    "Benchmark dataset {$year} imported.",
+    [
+        'year' => $year,
+        'source' => $source,
+        'records_count' => count($rows),
+        'activated_on_import' => $shouldActivate,
+    ]
+);
     $message =
         "{$year} benchmark dataset imported successfully. "
         . count($rows)
@@ -660,7 +680,9 @@ public function destroyDataset(BenchmarkDataset $dataset)
                     'The active benchmark dataset cannot be deleted.',
             ]);
     }
-
+$deletedDatasetId = $dataset->id;
+$deletedYear = $dataset->year;
+$deletedSource = $dataset->source;
     try {
 
         DB::transaction(function () use ($dataset) {
@@ -692,12 +714,20 @@ public function destroyDataset(BenchmarkDataset $dataset)
                     'The dataset could not be deleted. No data was changed.',
             ]);
     }
-
+AuditLogger::log(
+    'benchmark.deleted',
+    null,
+    "Benchmark dataset {$deletedYear} deleted.",
+    [
+        'dataset_id' => $deletedDatasetId,
+        'year' => $deletedYear,
+        'source' => $deletedSource,
+    ]
+);
     return redirect()
         ->route('admin.country-data.index')
         ->with(
             'success',
-            "Benchmark dataset {$dataset->year} was deleted successfully."
-        );
+"Benchmark dataset {$deletedYear} was deleted successfully."        );
 }
 }

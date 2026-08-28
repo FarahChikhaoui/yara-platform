@@ -42,6 +42,7 @@ protected $fillable = [
 'transformation_status',
 'payment_status',
 'paid_at',
+'framework_version',
 'stripe_checkout_session_id',
 'assigned_consultant_id'
 ];

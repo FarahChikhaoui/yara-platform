@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
+use App\Models\User;
+use App\Notifications\NewTransformationRequestNotification;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
@@ -294,6 +296,7 @@ if (
          * NOW the Transformation request can
          * officially enter expert review.
          */
+        $wasAlreadyPaid = $assessment->payment_status === 'paid';
       $assessment->update([
     'engagement_type' => 'transformation',
     'transformation_status' => 'submitted',
@@ -303,7 +306,20 @@ if (
 
     'stripe_checkout_session_id' => $session->id,
 ]);
+/*
+ * Notify administrators only the first time
+ * this successful payment is processed.
+ */
+if (!$wasAlreadyPaid) {
 
+    $admins = User::where('role', 'admin')->get();
+
+    foreach ($admins as $admin) {
+        $admin->notify(
+            new NewTransformationRequestNotification($assessment)
+        );
+    }
+}
         /*
          * Show the confirmation page we
          * already created earlier.

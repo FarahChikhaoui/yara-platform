@@ -17,7 +17,8 @@ use App\Http\Controllers\PulseCheckController;
 use App\Http\Controllers\ConsultantController;
 use App\Http\Controllers\TransformationPaymentController;
 use App\Http\Controllers\AdminCountryDataController;
-
+use App\Http\Controllers\AdminAuditLogController;
+use App\Http\Controllers\NotificationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -138,7 +139,10 @@ $maturityLevels = \App\Models\MaturityLevel::orderBy('min_score')
 */
 
 Route::middleware('auth')->group(function () {
-
+Route::get(
+    '/notifications/{notification}/open',
+    [NotificationController::class, 'open']
+)->name('notifications.open');
 Route::get(
     '/assessment/{assessment}/transformation/payment',
     [TransformationPaymentController::class, 'show']
@@ -187,6 +191,17 @@ Route::post(
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'client'])->group(function () {
+    Route::get(
+    '/assessment/progress/compare',
+    [AssessmentController::class, 'comparison']
+)->name('assessment.comparison');
+
+Route::get(
+    '/assessment/simulator',
+    [AssessmentController::class, 'simulator']
+)->name('assessment.simulator');
+
+
 Route::get(
     '/assessment/{assessment}/transformation/submitted',
     [AssessmentController::class, 'transformationSubmitted']
@@ -371,7 +386,10 @@ Route::middleware(['auth', 'consultant'])
     'assessments/{assessment}/roadmap/generate',
     [ConsultantController::class, 'generateRoadmap']
 )->name('consultant.roadmap.generate');
-
+Route::post(
+    '/consultant/assessments/{assessment}/ai-summary/generate',
+    [ConsultantController::class, 'generateAiSummary']
+)->name('consultant.ai-summary.generate');
 Route::patch(
     '/consultant/roadmap/initiatives/{initiative}',
     [ConsultantController::class, 'updateRoadmapInitiative']
@@ -438,7 +456,10 @@ Route::get(
     '/country-data',
     [AdminCountryDataController::class, 'index']
 )->name('admin.country-data.index');
-
+Route::get(
+    '/audit-logs',
+    [AdminAuditLogController::class, 'index']
+)->name('admin.audit-logs.index');
 Route::patch(
     '/country-data/datasets/{dataset}/activate',
     [AdminCountryDataController::class, 'activate']

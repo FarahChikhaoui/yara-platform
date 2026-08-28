@@ -868,9 +868,90 @@
 @endphp
 
 
-@if($consultantAiAnalysis)
-
 <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+@if(!$consultantAiAnalysis)
+
+    {{-- Empty state: consultant can generate the brief --}}
+    <div class="p-8">
+
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+
+            <div class="max-w-2xl">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 text-yellow-700">
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9.813 15.904L9 18l-.813-2.096a4.5 4.5 0 00-2.591-2.591L3.5 12.5l2.096-.813a4.5 4.5 0 002.591-2.591L9 7l.813 2.096a4.5 4.5 0 002.591 2.591l2.096.813-2.096.813a4.5 4.5 0 00-2.591 2.591z"
+                            />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-yellow-600">
+                            AI Assessment Brief
+                        </p>
+
+                        <h2 class="mt-1 text-xl font-bold text-slate-950">
+                            Generate readiness analysis
+                        </h2>
+                    </div>
+
+                </div>
+
+                <p class="mt-4 text-sm leading-6 text-slate-500">
+                    Generate an AI-assisted interpretation of the organization's
+                    assessment evidence to support your consultant review.
+                    This analysis is diagnostic and does not generate the
+                    Transformation Roadmap.
+                </p>
+
+            </div>
+
+            <form
+    method="POST"
+    action="{{ route('consultant.ai-summary.generate', $assessment) }}"
+    class="flex-none"
+>
+    @csrf
+
+    <button
+        type="submit"
+        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-yellow-300 hover:bg-yellow-50 hover:text-slate-950"
+    >
+        <svg
+            class="h-4 w-4 text-yellow-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.813 15.904L9 18l-.813-2.096a4.5 4.5 0 00-2.591-2.591L3.5 12.5l2.096-.813a4.5 4.5 0 002.591-2.591L9 7l.813 2.096a4.5 4.5 0 002.591 2.591l2.096.813-2.096.813a4.5 4.5 0 00-2.591 2.591z"
+            />
+        </svg>
+
+        Generate Brief
+    </button>
+</form>
+
+        </div>
+
+    </div>
+
+@else
 
     {{-- Header --}}
     <div class="flex flex-col gap-5 p-7 sm:flex-row sm:items-start sm:justify-between">
@@ -903,13 +984,43 @@
         </div>
 
 
-        @if($consultantSummaryGeneratedAt)
+        <div class="flex flex-none items-center gap-3">
 
-            <span class="flex-none text-xs text-slate-400">
-                Generated {{ $consultantSummaryGeneratedAt->diffForHumans() }}
-            </span>
+    @if($consultantSummaryGeneratedAt)
+        <span class="text-xs text-slate-400">
+            Generated {{ $consultantSummaryGeneratedAt->diffForHumans() }}
+        </span>
+    @endif
 
-        @endif
+    <form
+        method="POST"
+        action="{{ route('consultant.ai-summary.generate', $assessment) }}"
+    >
+        @csrf
+
+        <button
+            type="submit"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-yellow-300 hover:bg-yellow-50 hover:text-slate-900"
+        >
+            <svg
+                class="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M16.023 9.348h4.992V4.356M2.985 19.644v-4.992h4.992M4.93 9.348a7.5 7.5 0 0112.321-2.786l3.764 2.786M3 14.652l3.764 2.786a7.5 7.5 0 0012.321-2.786"
+                />
+            </svg>
+
+            Regenerate
+        </button>
+    </form>
+
+</div>
 
     </div>
 
@@ -1125,9 +1236,10 @@
 
     </div>
 
+@endif
+
 </section>
 
-@endif
 {{-- TRANSFORMATION ROADMAP WORKSPACE --}}
 <section id="roadmap-workspace" class="scroll-mt-24">
     @if($assessment->transformation_status === 'submitted')

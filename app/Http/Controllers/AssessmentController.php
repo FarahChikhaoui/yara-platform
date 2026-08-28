@@ -59,16 +59,19 @@ class AssessmentController extends Controller
      * create a new one and permanently store its journey.
      */
     if (!$assessment) {
-        $assessment = Assessment::create([
-            'company_id' => auth()->user()->company_id,
-            'user_id' => auth()->id(),
-            'title' => 'AI Readiness Assessment',
-            'status' => 'in_progress',
-            'engagement_type' => $engagementType,
-            'transformation_status' => $engagementType === 'transformation'
-                ? 'planning'
-                : null,
-        ]);
+       $assessment = Assessment::create([
+    'company_id' => auth()->user()->company_id,
+    'user_id' => auth()->id(),
+    'title' => 'AI Readiness Assessment',
+    'status' => 'in_progress',
+
+    'framework_version' => config('yara.framework_version'),
+
+    'engagement_type' => $engagementType,
+    'transformation_status' => $engagementType === 'transformation'
+        ? 'planning'
+        : null,
+]);
     }
 
     $dimensions = Dimension::with([
@@ -2026,6 +2029,289 @@ return view('assessments.partials.ai-summary-results', [
         return [$averageScore, $totalWeightedScore];
     }
 
+    public function comparison()
+{
+    $user = auth()->user();
+
+    /*
+     * Retrieve completed assessments belonging to
+     * the current user's organization.
+     *
+     * Oldest -> newest makes selecting the latest
+     * and immediately previous assessment straightforward.
+     */
+    $completedAssessments = Assessment::where(
+            'company_id',
+            $user->company_id
+        )
+        ->where('user_id', $user->id)
+        ->where('status', 'completed')
+        ->whereNotNull('company_score')
+        ->orderBy('created_at')
+        ->get();
+
+    /*
+     * Progress comparison requires at least
+     * two completed assessments.
+     */
+    abort_if(
+        $completedAssessments->count() < 2,
+        404,
+        'At least two completed assessments are required for comparison.'
+    );
+
+    /*
+ * Default comparison:
+ * latest completed assessment vs immediately previous assessment.
+ *
+ * The user may override either assessment through
+ * ?previous=ID&current=ID
+ */
+$currentAssessment = $completedAssessments->last();
+
+$previousAssessment = $completedAssessments
+    ->slice(-2, 1)
+    ->first();
+
+
+if (request()->filled('previous') && request()->filled('current')) {
+
+    $selectedPrevious = $completedAssessments->firstWhere(
+        'id',
+        (int) request('previous')
+    );
+
+    $selectedCurrent = $completedAssessments->firstWhere(
+        'id',
+        (int) request('current')
+    );
+
+    /*
+     * Only allow assessments belonging to the collection
+     * we already authorized above.
+     */
+    if (
+        $selectedPrevious
+        && $selectedCurrent
+        && $selectedPrevious->id !== $selectedCurrent->id
+    ) {
+        $previousAssessment = $selectedPrevious;
+        $currentAssessment = $selectedCurrent;
+    }
+}/*
+ * Always compare chronologically:
+ * older assessment -> newer assessment.
+ */
+if (
+    $previousAssessment->created_at->gt($currentAssessment->created_at)
+) {
+    [$previousAssessment, $currentAssessment] = [
+        $currentAssessment,
+        $previousAssessment,
+    ];
+}
+/*
+ * Detect whether the two assessments were completed
+ * using different versions of the YARA framework.
+ */
+$frameworkVersionsDiffer =
+    $previousAssessment->framework_version !== null
+    && $currentAssessment->framework_version !== null
+    && $previousAssessment->framework_version
+        !== $currentAssessment->framework_version;
+
+    /*
+     * Load the responses for both assessments
+     * using the same relationships used by Results.
+     */
+    $currentResponses = Response::with([
+        'answerOption',
+        'question.dimension',
+    ])
+        ->where('assessment_id', $currentAssessment->id)
+        ->get();
+
+    $previousResponses = Response::with([
+        'answerOption',
+        'question.dimension',
+    ])
+        ->where('assessment_id', $previousAssessment->id)
+        ->get();
+
+    /*
+     * Reuse YARA's existing scoring engine.
+     * We do NOT create separate comparison scoring logic.
+     */
+    $currentDimensionScores =
+        $this->computeDimensionScores($currentResponses);
+
+    $previousDimensionScores =
+        $this->computeDimensionScores($previousResponses);
+
+    /*
+     * Build one comparison collection.
+     *
+     * union() allows us to keep dimensions that may exist
+     * in only one of the two assessments.
+     */
+    $dimensionNames = $currentDimensionScores
+        ->keys()
+        ->merge($previousDimensionScores->keys())
+        ->unique()
+        ->values();
+
+    $dimensionComparison = $dimensionNames
+        ->map(function ($dimensionName) use (
+            $currentDimensionScores,
+            $previousDimensionScores
+        ) {
+            $current = $currentDimensionScores->get($dimensionName);
+            $previous = $previousDimensionScores->get($dimensionName);
+
+            return [
+                'dimension' => $dimensionName,
+
+                'previous_score' => $previous !== null
+                    ? round($previous, 1)
+                    : null,
+
+                'current_score' => $current !== null
+                    ? round($current, 1)
+                    : null,
+
+                'change' => (
+                    $current !== null &&
+                    $previous !== null
+                )
+                    ? round($current - $previous, 1)
+                    : null,
+            ];
+        });
+
+    /*
+     * Overall organizational score movement.
+     *
+     * We deliberately compare company_score,
+     * NOT combined_score, because country benchmark
+     * changes should not be interpreted as organizational
+     * improvement or decline.
+     */
+    $overallChange = round(
+        $currentAssessment->company_score
+            - $previousAssessment->company_score,
+        1
+    );
+
+    return view(
+        'assessments.comparison',
+        compact(
+            'completedAssessments',
+            'currentAssessment',
+            'previousAssessment',
+            'currentDimensionScores',
+            'previousDimensionScores',
+            'dimensionComparison',
+            'overallChange',
+                'frameworkVersionsDiffer'
+
+        )
+    );
+}
+public function simulator()
+{
+    $user = auth()->user();
+
+    /*
+     * Use the user's latest completed Full Assessment
+     * as the simulator baseline.
+     *
+     * The simulator itself remains an independent tool:
+     * it is not attached to one assessment through the URL.
+     */
+    $assessment = Assessment::where(
+            'company_id',
+            $user->company_id
+        )
+        ->where('user_id', $user->id)
+        ->where('status', 'completed')
+        ->whereNotNull('company_score')
+        ->latest('created_at')
+        ->first();
+
+    abort_if(
+        !$assessment,
+        404,
+        'Complete an AI Readiness Assessment before using the simulator.'
+    );
+
+    /*
+     * Load the responses from the latest assessment
+     * to establish the organization's current baseline.
+     */
+    $responses = Response::with([
+        'answerOption',
+        'question.dimension',
+    ])
+        ->where('assessment_id', $assessment->id)
+        ->get();
+
+    /*
+     * Current capability scores.
+     */
+    $dimensionScores = $this->computeDimensionScores($responses);
+
+    /*
+     * Determine the scoring weight represented
+     * by each capability.
+     */
+    $dimensionWeights = $responses
+        ->filter(function ($response) {
+            return $response->question
+                && $response->question->dimension
+                && $response->answerOption;
+        })
+        ->groupBy(function ($response) {
+            return $response->question->dimension->name;
+        })
+        ->map(function ($group) {
+            return $group->sum(function ($response) {
+                return $response->question?->weight ?? 1;
+            });
+        });
+
+    $totalWeight = $dimensionWeights->sum();
+
+    /*
+     * Dataset used by the interactive simulator.
+     */
+    $dimensions = $dimensionScores
+        ->map(function ($score, $dimensionName) use (
+            $dimensionWeights,
+            $totalWeight
+        ) {
+            $weight = $dimensionWeights->get($dimensionName, 0);
+
+            return [
+                'name' => $dimensionName,
+                'current_score' => round($score, 1),
+
+                'weight' => $weight,
+
+                'weight_percentage' => $totalWeight > 0
+                    ? ($weight / $totalWeight) * 100
+                    : 0,
+            ];
+        })
+        ->values();
+
+    return view(
+        'assessments.simulator',
+        compact(
+            'assessment',
+            'dimensions'
+        )
+    );
+}
     /**
      * Compute a weighted 0–100 score per dimension, keyed by dimension name.
      *
@@ -2310,6 +2596,7 @@ $this->authorizeClientAssessment($assessment);
         . '.pdf'
     );
 }
+
 
     private function authorizeClientAssessment(Assessment $assessment): void
 {

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\User;
+use App\Services\AuditLogger;
+use App\Notifications\TransformationAssignedNotification;
 
 class AdminTransformationController extends Controller
 {
@@ -120,11 +122,27 @@ return view(
     /*
      * Save assignment on the Transformation request.
      */
-    $assessment->update([
-        'assigned_consultant_id' => $consultant->id,
-    ]);
+   $assessment->update([
+    'assigned_consultant_id' => $consultant->id,
+]);
 
-    return redirect()
+$consultant->notify(
+    new TransformationAssignedNotification($assessment)
+);
+
+AuditLogger::log(
+    'transformation.consultant_assigned',
+    $assessment,
+    "Consultant {$consultant->name} assigned to Transformation request.",
+    [
+        'assessment_id' => $assessment->id,
+        'consultant_id' => $consultant->id,
+        'consultant_name' => $consultant->name,
+        'company_id' => $assessment->company_id,
+    ]
+);
+
+return redirect()
         ->route('admin.transformations.index')
         ->with(
             'success',
