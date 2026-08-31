@@ -205,7 +205,85 @@
             font-size: 11px;
             font-weight: bold;
         }
+        .snapshot {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: collapse;
+        }
 
+        .snapshot td {
+            width: 25%;
+            padding: 12px 10px;
+            border: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        .snapshot-value {
+            display: block;
+            margin-top: 4px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .brief-headline {
+            margin-top: 12px;
+            padding: 14px 16px;
+            background: #fffbeb;
+            border-left: 3px solid #facc15;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+
+        .brief-table {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: separate;
+            border-spacing: 8px 0;
+        }
+
+        .brief-table td {
+            width: 33.33%;
+            padding: 13px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            vertical-align: top;
+        }
+
+        .brief-type {
+            margin-bottom: 5px;
+            color: #a16207;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .brief-title {
+            margin-bottom: 5px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .brief-dimension {
+            margin-bottom: 7px;
+            color: #64748b;
+            font-size: 8px;
+        }
+
+        .objectives {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: collapse;
+        }
+
+        .objectives td {
+            width: 33.33%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
         .footer {
             margin-top: 30px;
             padding-top: 12px;
@@ -288,7 +366,261 @@
 
     </div>
 
+{{-- =====================================================
+     AI READINESS SNAPSHOT
+====================================================== --}}
+<div class="section">
 
+    <div class="eyebrow">
+        Assessment Context
+    </div>
+
+    <h2>
+        AI Readiness Snapshot
+    </h2>
+
+    <p class="section-description">
+        A concise view of the organizational readiness evidence
+        used to inform this Transformation Roadmap.
+    </p>
+
+    <table class="snapshot">
+        <tr>
+
+            <td>
+                <span class="meta-label">
+                    Organizational Readiness
+                </span>
+
+                <span class="snapshot-value">
+                    {{ number_format((float) $assessment->company_score, 1) }}/100
+                </span>
+            </td>
+
+            <td>
+                <span class="meta-label">
+                    Current Maturity
+                </span>
+
+                <span class="snapshot-value">
+                    @if($currentMaturity)
+                        Level {{ $currentMaturity->level }}
+                    @else
+                        —
+                    @endif
+                </span>
+
+                @if($currentMaturity)
+                    <div style="margin-top:3px; color:#64748b; font-size:8px;">
+                        {{ $currentMaturity->label ?? $currentMaturity->name ?? '' }}
+                    </div>
+                @endif
+            </td>
+
+            <td>
+                <span class="meta-label">
+                    Country Benchmark
+                </span>
+
+                <span class="snapshot-value">
+                    @if($assessment->country_ai_score !== null)
+                        {{ number_format((float) $assessment->country_ai_score, 1) }}/100
+                    @else
+                        —
+                    @endif
+                </span>
+
+                @if($assessment->country_ai_year)
+                    <div style="margin-top:3px; color:#64748b; font-size:8px;">
+                        {{ $assessment->country_ai_year }} benchmark
+                    </div>
+                @endif
+            </td>
+
+            <td>
+                <span class="meta-label">
+                    YARA Composite
+                </span>
+
+                <span class="snapshot-value">
+                    @if($assessment->combined_score !== null)
+                        {{ number_format((float) $assessment->combined_score, 1) }}/100
+                    @else
+                        —
+                    @endif
+                </span>
+            </td>
+
+        </tr>
+    </table>
+
+</div>
+
+
+{{-- =====================================================
+     AI ASSESSMENT BRIEF
+====================================================== --}}
+@if($aiBrief)
+
+    <div class="section">
+
+        <div class="eyebrow">
+            Expert Decision Support
+        </div>
+
+        <h2>
+            AI Assessment Brief
+        </h2>
+
+        <p class="section-description">
+            AI-assisted interpretation of the assessment evidence
+            used to support expert review and roadmap development.
+        </p>
+
+        @if(!empty($aiBrief['headline']))
+            <div class="brief-headline">
+                {{ $aiBrief['headline'] }}
+            </div>
+        @endif
+
+
+        <table class="brief-table">
+            <tr>
+
+                {{-- PRIORITY RISK --}}
+                <td>
+                    <div class="brief-type">
+                        Priority Risk
+                    </div>
+
+                    <div class="brief-title">
+                        {{ $aiBrief['priority_risk']['title'] ?? '—' }}
+                    </div>
+
+                    @if(!empty($aiBrief['priority_risk']['dimension']))
+                        <div class="brief-dimension">
+                            {{ $aiBrief['priority_risk']['dimension'] }}
+                        </div>
+                    @endif
+
+                    <div>
+                        {{ $aiBrief['priority_risk']['insight'] ?? '—' }}
+                    </div>
+                </td>
+
+
+                {{-- STRATEGIC STRENGTH --}}
+                <td>
+                    <div class="brief-type">
+                        Strategic Strength
+                    </div>
+
+                    <div class="brief-title">
+                        {{ $aiBrief['strategic_strength']['title'] ?? '—' }}
+                    </div>
+
+                    @if(!empty($aiBrief['strategic_strength']['dimension']))
+                        <div class="brief-dimension">
+                            {{ $aiBrief['strategic_strength']['dimension'] }}
+                        </div>
+                    @endif
+
+                    <div>
+                        {{ $aiBrief['strategic_strength']['insight'] ?? '—' }}
+                    </div>
+                </td>
+
+
+                {{-- READINESS PATTERN --}}
+                <td>
+                    <div class="brief-type">
+                        Readiness Pattern
+                    </div>
+
+                    <div class="brief-title">
+                        {{ $aiBrief['readiness_pattern']['title'] ?? '—' }}
+                    </div>
+
+                    <div>
+                        {{ $aiBrief['readiness_pattern']['insight'] ?? '—' }}
+                    </div>
+                </td>
+
+            </tr>
+        </table>
+
+    </div>
+
+@endif
+
+
+{{-- =====================================================
+     TRANSFORMATION OBJECTIVES
+====================================================== --}}
+@if($assessment->roadmapPreference)
+
+    <div class="section">
+
+        <div class="eyebrow">
+            Transformation Direction
+        </div>
+
+        <h2>
+            Transformation Objectives
+        </h2>
+
+        <p class="section-description">
+            The target and delivery constraints defined by the
+            organization before roadmap development.
+        </p>
+
+        <table class="objectives">
+            <tr>
+
+                <td>
+                    <span class="meta-label">
+                        Maturity Direction
+                    </span>
+
+                    <span class="meta-value">
+                        @if($currentMaturity)
+                            Level {{ $currentMaturity->level }}
+                        @else
+                            —
+                        @endif
+
+                        →
+
+                        {{ $assessment->roadmapPreference->target_maturity ?? '—' }}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="meta-label">
+                        Timeline
+                    </span>
+
+                    <span class="meta-value">
+                        {{ $assessment->roadmapPreference->timeframe ?? '—' }}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="meta-label">
+                        Investment Capacity
+                    </span>
+
+                    <span class="meta-value">
+                        {{ $assessment->roadmapPreference->budget_level ?? '—' }}
+                    </span>
+                </td>
+
+            </tr>
+        </table>
+
+    </div>
+
+@endif
     {{-- INTRODUCTION --}}
     <div class="section">
 

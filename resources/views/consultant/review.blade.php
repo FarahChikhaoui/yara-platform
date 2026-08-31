@@ -3,7 +3,62 @@
 @section('content')
 
 <div class="max-w-6xl mx-auto space-y-10 pb-16">
+{{-- Roadmap finalized toast --}}
+<div
+    id="roadmap-finalized-toast"
+    class="fixed right-6 top-6 z-[200] hidden w-full max-w-sm translate-y-[-10px] opacity-0 transition-all duration-300"
+>
+    <div class="flex items-start gap-3 rounded-xl border border-emerald-200 bg-white px-5 py-4 shadow-xl shadow-slate-900/10">
 
+        <div class="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4.5 12.75l6 6 9-13.5"
+                />
+            </svg>
+        </div>
+
+        <div class="min-w-0 flex-1">
+            <p class="text-sm font-bold text-slate-950">
+                Roadmap finalized
+            </p>
+
+            <p class="mt-1 text-sm leading-5 text-slate-500">
+                The roadmap was released to the client and the client was notified by email.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            id="close-roadmap-finalized-toast"
+            class="flex-none text-slate-400 transition hover:text-slate-700"
+            aria-label="Close notification"
+        >
+            <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+        </button>
+
+    </div>
+</div>
     {{-- Dashboard --}}
 <a href="{{ route('consultant.dashboard') }}"
    aria-label="Dashboard"
@@ -24,13 +79,7 @@
 
 
         <div class="flex items-center gap-2">
-            <a href="#review"
-               class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-                </svg>
-                Jump to review
-            </a>
+            
             <button type="button" onclick="window.print()"
                 class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 print:hidden">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -457,7 +506,7 @@
                     id="toggle-responses"
                     class="flex-none text-sm font-semibold text-slate-500 transition hover:text-slate-900"
                 >
-                    Collapse all
+                    Expand all
                 </button>
             </div>
         </div>
@@ -477,8 +526,7 @@
 
             @forelse($responsesByDimension as $dimensionName => $dimensionResponses)
 
-                <details class="response-group group overflow-hidden rounded-2xl border border-slate-200 bg-white" open>
-
+<details class="response-group group overflow-hidden rounded-2xl border border-slate-200 bg-white">
                     {{-- Dimension header --}}
                     <summary class="flex cursor-pointer list-none items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4 transition group-open:border-b group-[:not([open])]:border-b-0">
                         <h3 class="font-bold text-slate-900">
@@ -868,8 +916,10 @@
 @endphp
 
 
-<section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
+<section
+    id="consultant-ai-summary-container"
+    class="rounded-2xl border border-slate-200 bg-white shadow-sm"
+>
 @if(!$consultantAiAnalysis)
 
     {{-- Empty state: consultant can generate the brief --}}
@@ -918,7 +968,8 @@
 
             </div>
 
-            <form
+           <form
+    id="consultant-ai-summary-form"
     method="POST"
     action="{{ route('consultant.ai-summary.generate', $assessment) }}"
     class="flex-none"
@@ -993,9 +1044,10 @@
     @endif
 
     <form
-        method="POST"
-        action="{{ route('consultant.ai-summary.generate', $assessment) }}"
-    >
+    id="consultant-ai-summary-regenerate-form"
+    method="POST"
+    action="{{ route('consultant.ai-summary.generate', $assessment) }}"
+>
         @csrf
 
         <button
@@ -1503,15 +1555,7 @@
             </div>
 
 
-            <div class="mt-5 border-t border-slate-200 pt-5">
-
-                <p class="text-xs leading-5 text-slate-400">
-                    The generated roadmap will remain a draft. You will be able
-                    to review initiatives, adjust priorities, add expert guidance
-                    and make changes before the roadmap is delivered to the client.
-                </p>
-
-            </div>
+            
 
         </div>
 
@@ -2305,13 +2349,16 @@ finalizeRoadmapButton?.addEventListener('click', async function () {
         }
 
 
-        /*
-         * Finalization changes several parts of the workspace:
-         * status, buttons and editing permissions.
-         *
-         * Reload once so the server renders the locked state.
-         */
-        window.location.reload();
+       /*
+ * Remember the successful finalization across the reload.
+ * The reloaded locked workspace will display a confirmation toast.
+ */
+sessionStorage.setItem(
+    'yara-roadmap-finalized',
+    'true'
+);
+
+window.location.reload();
 
 
     } catch (error) {
@@ -2825,8 +2872,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const toggleBtn = document.getElementById('toggle-responses');
 
     if (toggleBtn && responseGroups.length) {
-        let expanded = true;
-
+let expanded = false;
         toggleBtn.addEventListener('click', function () {
             expanded = !expanded;
             responseGroups.forEach(function (group) {
@@ -4028,52 +4074,453 @@ risksDependencies?.addEventListener(
 
 });
 /* ================================================================
+ * ROADMAP FINALIZED TOAST
+ * ================================================================ */
+
+const roadmapFinalizedToast =
+    document.getElementById('roadmap-finalized-toast');
+
+const closeRoadmapFinalizedToast =
+    document.getElementById('close-roadmap-finalized-toast');
+
+let roadmapFinalizedToastTimer = null;
+
+
+function hideRoadmapFinalizedToast() {
+
+    if (!roadmapFinalizedToast) {
+        return;
+    }
+
+    roadmapFinalizedToast.classList.add(
+        'opacity-0',
+        'translate-y-[-10px]'
+    );
+
+    setTimeout(() => {
+        roadmapFinalizedToast.classList.add('hidden');
+    }, 300);
+}
+
+
+if (
+    roadmapFinalizedToast &&
+    sessionStorage.getItem('yara-roadmap-finalized') === 'true'
+) {
+
+    /*
+     * Consume the flag so refreshing the page manually
+     * does not show the toast again.
+     */
+    sessionStorage.removeItem('yara-roadmap-finalized');
+
+    roadmapFinalizedToast.classList.remove('hidden');
+
+    requestAnimationFrame(() => {
+
+        roadmapFinalizedToast.classList.remove(
+            'opacity-0',
+            'translate-y-[-10px]'
+        );
+
+    });
+
+    roadmapFinalizedToastTimer =
+        setTimeout(hideRoadmapFinalizedToast, 5000);
+}
+
+
+closeRoadmapFinalizedToast?.addEventListener('click', function () {
+
+    clearTimeout(roadmapFinalizedToastTimer);
+
+    hideRoadmapFinalizedToast();
+
+});
+/* ================================================================
  * CONSULTANT AI ASSESSMENT BRIEF
  * ================================================================ */
 
-const aiBriefToggle =
-    document.getElementById('consultant-ai-brief-toggle');
+document.addEventListener('click', function (event) {
 
-const aiBriefDetails =
-    document.getElementById('consultant-ai-brief-details');
+    const toggle = event.target.closest(
+        '#consultant-ai-brief-toggle'
+    );
 
-const aiBriefLabel =
-    document.getElementById('consultant-ai-brief-label');
+    if (!toggle) {
+        return;
+    }
 
-const aiBriefChevron =
-    document.getElementById('consultant-ai-brief-chevron');
+    const details =
+        document.getElementById('consultant-ai-brief-details');
 
+    const label =
+        document.getElementById('consultant-ai-brief-label');
 
-aiBriefToggle?.addEventListener('click', function () {
+    const chevron =
+        document.getElementById('consultant-ai-brief-chevron');
 
     const expanded =
-        aiBriefToggle.getAttribute('aria-expanded') === 'true';
+        toggle.getAttribute('aria-expanded') === 'true';
 
-
-    aiBriefToggle.setAttribute(
+    toggle.setAttribute(
         'aria-expanded',
         expanded ? 'false' : 'true'
     );
 
-
-    aiBriefDetails?.classList.toggle(
+    details?.classList.toggle(
         'hidden',
         expanded
     );
 
-
-    if (aiBriefLabel) {
-        aiBriefLabel.textContent =
+    if (label) {
+        label.textContent =
             expanded
                 ? 'View full analysis'
                 : 'Hide full analysis';
     }
 
-
-    aiBriefChevron?.classList.toggle(
+    chevron?.classList.toggle(
         'rotate-180',
         !expanded
     );
+
+});
+/* ================================================================
+ * CONSULTANT AI BRIEF — GENERATE / REGENERATE WITHOUT PAGE RELOAD
+ * ================================================================ */
+
+document.addEventListener('submit', async function (event) {
+
+    const form = event.target.closest(
+        '#consultant-ai-summary-form, #consultant-ai-summary-regenerate-form'
+    );
+
+    if (!form) {
+        return;
+    }
+        event.preventDefault();
+
+        const button = form.querySelector('button[type="submit"]');
+
+        if (!button) {
+            return;
+        }
+
+        const originalHtml = button.innerHTML;
+
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="inline-flex items-center gap-2">
+                <svg
+                    class="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                >
+                    <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                    ></circle>
+
+                    <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                </svg>
+
+                Generating...
+            </span>
+        `;
+
+        try {
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                if (response.status === 422 && data.errors) {
+
+                    const firstError = Object.values(data.errors)
+                        .flat()
+                        .find(Boolean);
+
+                    throw new Error(
+                        firstError || 'Could not generate the AI brief.'
+                    );
+                }
+
+                throw new Error(
+                    data.message || 'Could not generate the AI brief.'
+                );
+            }
+
+const container =
+    document.getElementById('consultant-ai-summary-container');
+
+if (!container || !data.analysis) {
+    throw new Error('The AI brief was generated but could not be displayed.');
+}
+
+const analysis = data.analysis;
+
+const escapeHtml = function (value) {
+    const div = document.createElement('div');
+    div.textContent = value ?? '';
+    return div.innerHTML;
+};
+
+const risk = analysis.priority_risk || {};
+const strength = analysis.strategic_strength || {};
+const pattern = analysis.readiness_pattern || {};
+
+container.innerHTML = `
+    <div class="flex flex-col gap-5 p-7 sm:flex-row sm:items-start sm:justify-between">
+
+        <div>
+            <div class="flex flex-wrap items-center gap-3">
+
+                <p class="text-sm font-semibold uppercase tracking-wide text-yellow-600">
+                    AI Assessment Brief
+                </p>
+
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-2.5 py-1 text-[11px] font-semibold text-yellow-700">
+                    <span class="h-1.5 w-1.5 rounded-full bg-yellow-600"></span>
+                    AI Generated
+                </span>
+
+            </div>
+
+            <h2 class="mt-2 text-xl font-bold text-slate-950">
+                Readiness signals for consultant review
+            </h2>
+
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                AI-generated interpretation of the assessment evidence.
+                Use this brief as supporting context when reviewing the
+                transformation roadmap.
+            </p>
+        </div>
+
+        <div class="flex flex-none items-center gap-3">
+
+            <span class="text-xs text-slate-400">
+                Generated ${escapeHtml(data.generated_at || 'just now')}
+            </span>
+
+            <form
+                id="consultant-ai-summary-regenerate-form"
+                action="${escapeHtml(form.action)}"
+                method="POST"
+            >
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="${escapeHtml(
+                        form.querySelector('input[name="_token"]')?.value || ''
+                    )}"
+                >
+
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-yellow-300 hover:bg-yellow-50 hover:text-slate-900"
+                >
+                    <svg
+                        class="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M16.023 9.348h4.992V4.356M2.985 19.644v-4.992h4.992M4.93 9.348a7.5 7.5 0 0112.321-2.786l3.764 2.786M3 14.652l3.764 2.786a7.5 7.5 0 0012.321-2.786"
+                        />
+                    </svg>
+
+                    Regenerate
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    ${analysis.headline ? `
+        <div class="border-t border-slate-100 px-7 py-5">
+            <p class="text-base font-semibold leading-7 text-slate-800">
+                “${escapeHtml(analysis.headline)}”
+            </p>
+        </div>
+    ` : ''}
+
+    <div class="grid border-t border-slate-100 md:grid-cols-3">
+
+        <div class="p-6 md:border-r md:border-slate-100">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                <p class="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                    Priority Risk
+                </p>
+            </div>
+
+            <p class="mt-3 font-bold text-slate-950">
+                ${escapeHtml(risk.title || '—')}
+            </p>
+
+            ${risk.dimension ? `
+                <p class="mt-1 text-xs font-semibold text-red-600">
+                    ${escapeHtml(risk.dimension)}
+                </p>
+            ` : ''}
+        </div>
+
+
+        <div class="border-t border-slate-100 p-6 md:border-r md:border-t-0">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <p class="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                    Strategic Strength
+                </p>
+            </div>
+
+            <p class="mt-3 font-bold text-slate-950">
+                ${escapeHtml(strength.title || '—')}
+            </p>
+
+            ${strength.dimension ? `
+                <p class="mt-1 text-xs font-semibold text-emerald-600">
+                    ${escapeHtml(strength.dimension)}
+                </p>
+            ` : ''}
+        </div>
+
+
+        <div class="border-t border-slate-100 p-6 md:border-t-0">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+                <p class="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                    Readiness Pattern
+                </p>
+            </div>
+
+            <p class="mt-3 font-bold text-slate-950">
+                ${escapeHtml(pattern.title || '—')}
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="border-t border-slate-100 px-7 py-4">
+
+        <button
+            type="button"
+            id="consultant-ai-brief-toggle"
+            class="group inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-yellow-700"
+            aria-expanded="false"
+        >
+            <span id="consultant-ai-brief-label">
+                View full analysis
+            </span>
+
+            <svg
+                id="consultant-ai-brief-chevron"
+                class="h-4 w-4 transition-transform duration-200"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19 9l-7 7-7-7"
+                />
+            </svg>
+        </button>
+
+    </div>
+
+
+    <div
+        id="consultant-ai-brief-details"
+        class="hidden border-t border-slate-100 bg-slate-50/50 px-7 py-6"
+    >
+        <div class="grid gap-6 lg:grid-cols-2">
+
+            ${risk.insight ? `
+                <div>
+                    <p class="text-sm font-bold text-slate-950">
+                        Priority Risk Analysis
+                    </p>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        ${escapeHtml(risk.insight)}
+                    </p>
+                </div>
+            ` : ''}
+
+
+            ${strength.insight ? `
+                <div>
+                    <p class="text-sm font-bold text-slate-950">
+                        Strategic Strength Analysis
+                    </p>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        ${escapeHtml(strength.insight)}
+                    </p>
+                </div>
+            ` : ''}
+
+
+            ${pattern.insight ? `
+                <div>
+                    <p class="text-sm font-bold text-slate-950">
+                        Readiness Pattern
+                    </p>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        ${escapeHtml(pattern.insight)}
+                    </p>
+                </div>
+            ` : ''}
+
+        </div>
+    </div>
+`;
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                error.message ||
+                'The AI brief could not be generated. Please try again.'
+            );
+
+        } finally {
+
+            button.disabled = false;
+            button.innerHTML = originalHtml;
+
+        }
+
+    
 
 });
 </script>

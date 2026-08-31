@@ -89,8 +89,17 @@
                     <div class="group rounded-2xl border border-transparent bg-slate-50 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-200/70 hover:bg-yellow-50/40 hover:shadow-sm">
 
                         <p class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-                            Target maturity
+<svg
+    class="h-3.5 w-3.5 text-slate-400"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    stroke-width="2"
+>
+    <circle cx="12" cy="12" r="9"/>
+    <circle cx="12" cy="12" r="5"/>
+    <circle cx="12" cy="12" r="1"/>
+</svg>                            Target maturity
                         </p>
 
                         <p class="mt-2 font-bold text-slate-950">

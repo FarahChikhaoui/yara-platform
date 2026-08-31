@@ -10,6 +10,7 @@ use App\Services\GroqAIService;
 use Illuminate\Support\Facades\Log;
 use App\Services\AuditLogger;
 use Throwable;
+use App\Notifications\TransformationRoadmapReadyNotification;
 
 class ConsultantController extends Controller
 {
@@ -360,21 +361,85 @@ PROMPT;
     try {
         $summary = $ai->generate($prompt);
     } catch (Throwable $e) {
-        Log::error('Consultant AI assessment brief generation failed', [
-            'assessment_id' => $assessment->id,
-            'consultant_id' => auth()->id(),
-            'message' => $e->getMessage(),
-        ]);
+    Log::error('Consultant AI assessment brief generation failed', [
+        'assessment_id' => $assessment->id,
+        'consultant_id' => auth()->id(),
+        'message' => $e->getMessage(),
+    ]);
 
-        return back()->with(
-            'error',
-            'The AI analysis service is temporarily unavailable. Please try again in a moment.'
-        );
+    $message =
+        'The AI analysis service is temporarily unavailable. Please try again in a moment.';
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], 503);
     }
 
-    $analysis = json_decode($summary, true);
+    return back()->with('error', $message);
+}
 
-    if (
+$cleanSummary = trim($summary);
+
+// Remove Markdown code fences if the model ever adds them.
+$cleanSummary = preg_replace('/^```(?:json)?\s*/i', '', $cleanSummary);
+$cleanSummary = preg_replace('/\s*```$/', '', $cleanSummary);
+
+// Normalize Unicode non-breaking spaces sometimes returned by the AI.
+$cleanSummary = str_replace(
+    [
+        "\xC2\xA0",             // NBSP
+        "\xE2\x80\xAF",         // narrow NBSP
+        "\xE3\x80\x80",         // ideographic space
+    ],
+    ' ',
+    $cleanSummary
+);
+
+$analysis = json_decode($cleanSummary, true);
+
+/*
+ * Some reasoning models occasionally return an otherwise complete
+ * JSON object while omitting the final closing brace.
+ *
+ * Only attempt recovery when JSON decoding failed because the
+ * document ended unexpectedly. We do not modify valid JSON.
+ */
+if (
+    json_last_error() !== JSON_ERROR_NONE
+    && str_starts_with(ltrim($cleanSummary), '{')
+) {
+    $openBraces = substr_count($cleanSummary, '{');
+    $closeBraces = substr_count($cleanSummary, '}');
+
+    $missingBraces = $openBraces - $closeBraces;
+
+    if ($missingBraces > 0 && $missingBraces <= 2) {
+        $repairedSummary =
+            $cleanSummary . str_repeat('}', $missingBraces);
+
+        $repairedAnalysis = json_decode(
+            $repairedSummary,
+            true
+        );
+
+        if (
+            json_last_error() === JSON_ERROR_NONE
+            && is_array($repairedAnalysis)
+        ) {
+            $analysis = $repairedAnalysis;
+
+            Log::warning(
+                'Consultant AI assessment brief JSON was automatically repaired',
+                [
+                    'assessment_id' => $assessment->id,
+                    'missing_closing_braces' => $missingBraces,
+                ]
+            );
+        }
+    }
+}    if (
         json_last_error() !== JSON_ERROR_NONE ||
         !is_array($analysis) ||
         empty($analysis['priority_risk']) ||
@@ -386,10 +451,17 @@ PROMPT;
             'raw' => $summary ?? null,
         ]);
 
-        return back()->with(
-            'error',
-            'The AI analysis could not be generated in the expected format. Please try again.'
-        );
+       $message =
+    'The AI analysis could not be generated in the expected format. Please try again.';
+
+if ($request->expectsJson()) {
+    return response()->json([
+        'success' => false,
+        'message' => $message,
+    ], 422);
+}
+
+return back()->with('error', $message);
     }
 
     $assessment->update([
@@ -400,12 +472,23 @@ PROMPT;
         'ai_summary_generated_at' => now(),
     ]);
 
-    return redirect()
-        ->route('consultant.assessments.review', $assessment)
-        ->with(
-            'success',
-            'AI Assessment Brief generated successfully.'
-        );
+   if ($request->expectsJson()) {
+    return response()->json([
+        'success' => true,
+        'message' => 'AI Assessment Brief generated successfully.',
+        'analysis' => $analysis,
+        'generated_at' => optional(
+            $assessment->ai_summary_generated_at
+        )->diffForHumans(),
+    ]);
+}
+
+return redirect()
+    ->route('consultant.assessments.review', $assessment)
+    ->with(
+        'success',
+        'AI Assessment Brief generated successfully.'
+    );
 }
 public function generateRoadmap(
     Assessment $assessment,
@@ -1648,6 +1731,12 @@ $this->authorizeAssignedConsultant($assessment);
     'reviewed_by' => $user->id,
     'reviewed_at' => now(),
 ]);
+/*
+ * Notify the client that the finalized roadmap is ready.
+ */
+$assessment->user->notify(
+    new TransformationRoadmapReadyNotification($assessment)
+);
 
 AuditLogger::log(
     'transformation.roadmap_finalized',

@@ -18,31 +18,30 @@ use App\Models\BenchmarkDataset;
 
 class AssessmentController extends Controller
 {
-   public function start()
+  public function start()
 {
     /*
-     * assessment_intent is temporary and must only affect
-     * the NEXT assessment journey.
+     * Determine which journey brought the client here.
      *
-     * pull() retrieves the value and immediately removes it
-     * from the session so it cannot leak into future assessments.
+     * - Normal assessment journey:
+     *      self_assessment
+     *
+     * - Transformation journey:
+     *      transformation + planning
+     *
+     * "planning" means the client intends to purchase Transformation,
+     * NOT that payment has been completed.
      */
-    $intent = session()->pull('assessment_intent', 'assessment');
+    $isTransformationJourney =
+        session('assessment_intent') === 'transformation';
+
 
     /*
-     * Convert the temporary entry intent into the permanent
-     * engagement type stored on this specific assessment.
-     */
-    $engagementType = $intent === 'transformation'
-        ? 'transformation'
-        : 'self_assessment';
-
-    /*
-     * Resume an unfinished assessment only when it belongs
-     * to the SAME journey.
+     * Resume an existing unfinished assessment ONLY if it belongs
+     * to the same journey.
      *
-     * This prevents a self-assessment and a transformation
-     * assessment from accidentally being mixed together.
+     * This prevents "Start Transformation" from accidentally resuming
+     * an unfinished normal self-assessment, and vice versa.
      */
     $assessment = Assessment::where(
             'company_id',
@@ -50,29 +49,39 @@ class AssessmentController extends Controller
         )
         ->where('user_id', auth()->id())
         ->where('status', 'in_progress')
-        ->where('engagement_type', $engagementType)
+        ->where(
+            'engagement_type',
+            $isTransformationJourney
+                ? 'transformation'
+                : 'self_assessment'
+        )
         ->latest()
         ->first();
 
+
     /*
-     * If no matching unfinished assessment exists,
-     * create a new one and permanently store its journey.
+     * No unfinished assessment exists for this journey,
+     * so create the correct type.
      */
     if (!$assessment) {
-       $assessment = Assessment::create([
-    'company_id' => auth()->user()->company_id,
-    'user_id' => auth()->id(),
-    'title' => 'AI Readiness Assessment',
-    'status' => 'in_progress',
+        $assessment = Assessment::create([
+            'company_id' => auth()->user()->company_id,
+            'user_id' => auth()->id(),
+            'title' => 'AI Readiness Assessment',
+            'status' => 'in_progress',
 
-    'framework_version' => config('yara.framework_version'),
+            'framework_version' => config('yara.framework_version'),
 
-    'engagement_type' => $engagementType,
-    'transformation_status' => $engagementType === 'transformation'
-        ? 'planning'
-        : null,
-]);
+            'engagement_type' => $isTransformationJourney
+                ? 'transformation'
+                : 'self_assessment',
+
+            'transformation_status' => $isTransformationJourney
+                ? 'planning'
+                : null,
+        ]);
     }
+
 
     $dimensions = Dimension::with([
         'questions' => function ($query) {
@@ -85,6 +94,7 @@ class AssessmentController extends Controller
                 ]);
         },
     ])->get();
+
 
     return view(
         'assessments.start',
@@ -195,40 +205,12 @@ public function transformationBrief(Assessment $assessment)
 
    public function startTransformation()
 {
-    $user = auth()->user();
-
     /*
-     * If the user already has a completed assessment,
-     * there is no reason to make them complete the same
-     * assessment again.
+     * Starting Transformation is its own journey.
      *
-     * IMPORTANT:
-     * Do not store assessment_intent here because we are
-     * not starting a new assessment.
-     */
-    $completedAssessment = Assessment::where('user_id', $user->id)
-        ->where('status', 'completed')
-        ->whereNotNull('company_score')
-        ->latest()
-        ->first();
-
-    if ($completedAssessment) {
-        return redirect()
-            ->route('assessment.results', $completedAssessment)
-            ->with(
-                'info',
-                'Your latest completed assessment can be used to build your Transformation Roadmap.'
-            );
-    }
-
-    /*
-     * No completed assessment exists.
-     *
-     * The next assessment must therefore be created as a
-     * Transformation engagement.
-     *
-     * start() will consume this value using session()->pull(),
-     * so it cannot affect future assessments.
+     * Do not reuse a previous self-assessment here.
+     * The Transformation journey starts with its own
+     * prerequisite readiness assessment.
      */
     session([
         'assessment_intent' => 'transformation',
@@ -426,8 +408,15 @@ $countryYear = $countryBenchmark?->year;
             'combined_score' => round($combinedScore, 2),
         ]);
 
-        return redirect('/assessment/results/' . $assessment->id);
-    }
+if ($assessment->engagement_type === 'transformation') {
+    return redirect()
+        ->route('assessment.results', $assessment)
+        ->with('show_transformation_brief', true);
+}
+
+return redirect()
+    ->route('assessment.results', $assessment);
+}
 public function generateAiSummary(
     Request $request,
     Assessment $assessment,
@@ -2562,19 +2551,56 @@ $this->authorizeClientAssessment($assessment);
     /*
      * Load everything needed by the PDF.
      */
-    $assessment->load([
-        'company',
-        'transformationRoadmap.initiatives',
-    ]);
+  $assessment->load([
+    'company',
+    'roadmapPreference',
+    'transformationRoadmap.initiatives',
+]);
 
     $roadmap = $assessment->transformationRoadmap;
 
     abort_unless($roadmap, 404);
+    /*
+ * Current maturity is based only on the organization's
+ * readiness score, using the same logic as the Results page.
+ */
+$currentMaturity = MaturityLevel::where(
+    'min_score',
+    '<=',
+    $assessment->company_score
+)
+    ->where(
+        'max_score',
+        '>=',
+        $assessment->company_score
+    )
+    ->first();
 
-    $pdf = Pdf::loadView(
-        'assessments.transformation-roadmap-pdf',
-        compact('assessment', 'roadmap')
+/*
+ * Decode the consultant-generated AI Assessment Brief.
+ */
+$aiBrief = null;
+
+if ($assessment->ai_executive_summary) {
+    $decodedBrief = json_decode(
+        $assessment->ai_executive_summary,
+        true
     );
+
+    if (is_array($decodedBrief)) {
+        $aiBrief = $decodedBrief;
+    }
+}
+
+   $pdf = Pdf::loadView(
+    'assessments.transformation-roadmap-pdf',
+    compact(
+        'assessment',
+        'roadmap',
+        'currentMaturity',
+        'aiBrief'
+    )
+);
 
     /*
      * Produce a clean filename such as:
