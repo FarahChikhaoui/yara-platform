@@ -171,8 +171,7 @@
 
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
 
-                <div class="flex items-start justify-between gap-6">
-
+<div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                     <div class="flex items-start gap-4">
                         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-yellow-50">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-5 w-5 text-yellow-600">
@@ -200,8 +199,7 @@
 @if($inProgressAssessment)
 
     <a href="{{ route('assessment.resume', $inProgressAssessment) }}"
-       class="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-950 px-6 py-3 font-semibold text-white transition hover:bg-slate-800">
-        Continue Assessment
+class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 sm:w-auto sm:shrink-0"        Continue Assessment
 
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 24 24"

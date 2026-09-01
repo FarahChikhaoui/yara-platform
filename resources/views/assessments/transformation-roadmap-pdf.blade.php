@@ -284,6 +284,104 @@
             border: 1px solid #e2e8f0;
             vertical-align: top;
         }
+/* =========================================================
+   TRANSFORMATION TIMELINE
+========================================================= */
+
+.timeline-section {
+    margin-top: 30px;
+}
+
+.timeline-table {
+    width: 100%;
+    margin-top: 14px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 8px;
+}
+
+.timeline-table th {
+    padding: 7px 3px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 7px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.timeline-table th.timeline-initiative-header {
+    width: 28%;
+    padding-left: 8px;
+    text-align: left;
+}
+
+.timeline-table td {
+    height: 34px;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.timeline-table td.timeline-name {
+    padding: 7px 8px;
+    background: #ffffff;
+}
+
+.timeline-name-title {
+    font-size: 8px;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+.timeline-name-phase {
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 7px;
+}
+
+.timeline-cell {
+    padding: 0;
+}
+
+.timeline-bar {
+    height: 16px;
+    width: 100%;
+}
+
+.timeline-bar-high {
+    background: #f87171;
+}
+
+.timeline-bar-medium {
+    background: #fbbf24;
+}
+
+.timeline-bar-low {
+    background: #34d399;
+}
+
+.timeline-bar-default {
+    background: #facc15;
+}
+
+.timeline-legend {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 7px;
+}
+
+.timeline-legend-item {
+    margin-right: 14px;
+}
+
+.timeline-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 4px;
+}
+
         .footer {
             margin-top: 30px;
             padding-top: 12px;
@@ -810,6 +908,175 @@
 
     @endforeach
 
+{{-- =====================================================
+     TRANSFORMATION TIMELINE
+====================================================== --}}
+
+@php
+    $pdfTimeframe = $assessment->roadmapPreference?->timeframe;
+
+    $pdfTimelineMonths = match ($pdfTimeframe) {
+        '3 months' => 3,
+        '6 months' => 6,
+        '12 months' => 12,
+        '18-24 months' => 24,
+        default => null,
+    };
+
+    $pdfTimelineInitiatives = $roadmap->initiatives
+        ->filter(
+            fn ($initiative) =>
+                $initiative->start_month !== null
+                && $initiative->duration_months !== null
+        );
+@endphp
+
+
+@if($pdfTimelineMonths && $pdfTimelineInitiatives->isNotEmpty())
+
+    <div class="timeline-section">
+
+        <div class="eyebrow">
+            Transformation Timeline
+        </div>
+
+        <h2>
+            Implementation Roadmap
+        </h2>
+
+        <p class="section-description">
+            Planned sequencing of initiatives across the
+            {{ $pdfTimeframe }} transformation horizon.
+        </p>
+
+
+        <table class="timeline-table">
+
+            <thead>
+                <tr>
+
+                    <th class="timeline-initiative-header">
+                        Initiative
+                    </th>
+
+                    @for($month = 1; $month <= $pdfTimelineMonths; $month++)
+                        <th>
+                            M{{ $month }}
+                        </th>
+                    @endfor
+
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+                @foreach($pdfTimelineInitiatives as $initiative)
+
+                    @php
+                        $startMonth = max(
+                            1,
+                            (int) $initiative->start_month
+                        );
+
+                        $durationMonths = max(
+                            1,
+                            (int) $initiative->duration_months
+                        );
+
+                        $endMonth = min(
+                            $pdfTimelineMonths,
+                            $startMonth + $durationMonths - 1
+                        );
+
+                        $pdfPriorityClass = match(
+                            strtolower($initiative->priority ?? '')
+                        ) {
+                            'high' => 'timeline-bar-high',
+                            'medium' => 'timeline-bar-medium',
+                            'low' => 'timeline-bar-low',
+                            default => 'timeline-bar-default',
+                        };
+                    @endphp
+
+
+                    <tr>
+
+                        {{-- Initiative name --}}
+                        <td class="timeline-name">
+
+                            <div class="timeline-name-title">
+                                {{ $initiative->title }}
+                            </div>
+
+                            <div class="timeline-name-phase">
+                                {{ $initiative->phase
+                                    ?? ('Months ' . $startMonth . '-' . $endMonth) }}
+                            </div>
+
+                        </td>
+
+
+                        {{-- Timeline months --}}
+                        @for($month = 1; $month <= $pdfTimelineMonths; $month++)
+
+                            @php
+                                $isActive =
+                                    $month >= $startMonth
+                                    && $month <= $endMonth;
+                            @endphp
+
+                            <td class="timeline-cell">
+
+                                @if($isActive)
+                                    <div class="timeline-bar {{ $pdfPriorityClass }}"></div>
+                                @endif
+
+                            </td>
+
+                        @endfor
+
+                    </tr>
+
+                @endforeach
+
+            </tbody>
+
+        </table>
+
+
+        {{-- Priority legend --}}
+        <div class="timeline-legend">
+
+            <span class="timeline-legend-item">
+                <span
+                    class="timeline-dot"
+                    style="background:#f87171;"
+                ></span>
+                High priority
+            </span>
+
+            <span class="timeline-legend-item">
+                <span
+                    class="timeline-dot"
+                    style="background:#fbbf24;"
+                ></span>
+                Medium priority
+            </span>
+
+            <span class="timeline-legend-item">
+                <span
+                    class="timeline-dot"
+                    style="background:#34d399;"
+                ></span>
+                Low priority
+            </span>
+
+        </div>
+
+    </div>
+
+@endif
 
     {{-- OVERALL EXPERT GUIDANCE --}}
     @if(

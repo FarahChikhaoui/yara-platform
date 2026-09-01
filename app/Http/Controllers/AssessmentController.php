@@ -1466,6 +1466,12 @@ $this->authorizeClientAssessment($assessment);
          * with only the levels above the organization's current one.
          */
         $allMaturityLevels = MaturityLevel::orderBy('level')->get();
+/*
+ * SWOT analysis
+ *
+ * Built from deterministic assessment evidence.
+ * No AI-generated or unsupported external claims are used here.
+ */
 
         return view('assessments.results', compact(
             'assessment',
@@ -1488,6 +1494,7 @@ $this->authorizeClientAssessment($assessment);
             'lowestDimensionScore',
             'recommendations',
             'allMaturityLevels'
+            
         ));
     }
 public function countryInsights(Assessment $assessment)

@@ -989,6 +989,7 @@
 
 </section>
 
+
    {{-- Detailed capability breakdown --}}
 <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_40px_-28px_rgba(15,23,42,0.25)]">
 
@@ -2166,6 +2167,225 @@ href="{{ route('transformation.brief', $assessment) }}"                        c
     @endforelse
 
 </div>
+
+{{-- ================================================================
+     FINAL TRANSFORMATION TIMELINE / GANTT
+     Read-only timeline from the finalized expert-reviewed roadmap.
+     ================================================================ --}}
+
+@php
+    $finalRoadmapTimeframe =
+        $assessment->roadmapPreference?->timeframe;
+
+    $finalRoadmapTimelineMonths = match ($finalRoadmapTimeframe) {
+        '3 months' => 3,
+        '6 months' => 6,
+        '12 months' => 12,
+        '18-24 months' => 24,
+        default => null,
+    };
+
+    $finalTimelineInitiatives = $finalInitiatives
+        ->filter(
+            fn ($initiative) =>
+                $initiative->start_month !== null
+                && $initiative->duration_months !== null
+        );
+@endphp
+
+
+@if(
+    $finalRoadmapTimelineMonths
+    && $finalTimelineInitiatives->isNotEmpty()
+)
+
+    <div class="border-t border-slate-200/80 bg-white px-6 py-8 md:px-8">
+
+        {{-- Header --}}
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-yellow-600">
+                    Transformation Timeline
+                </p>
+
+                <h3 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+                    Implementation Roadmap
+                </h3>
+
+                <p class="mt-2 text-sm leading-6 text-slate-500">
+                    Planned sequencing of initiatives across the
+                    {{ $finalRoadmapTimeframe }} transformation horizon.
+                </p>
+
+            </div>
+
+            <span class="inline-flex w-fit items-center self-start rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                {{ $finalRoadmapTimeframe }}
+            </span>
+
+        </div>
+
+
+        {{-- Gantt --}}
+        <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200">
+
+            <div
+                class="min-w-[850px]"
+                style="
+                    display: grid;
+                    grid-template-columns:
+                        260px
+                        repeat({{ $finalRoadmapTimelineMonths }}, minmax(42px, 1fr));
+                "
+            >
+
+                {{-- Initiative header --}}
+                <div class="sticky left-0 z-10 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+                    Initiative
+                </div>
+
+                {{-- Month headers --}}
+                @for(
+                    $month = 1;
+                    $month <= $finalRoadmapTimelineMonths;
+                    $month++
+                )
+
+                    <div class="border-b border-l border-slate-200 bg-slate-50 px-2 py-3 text-center text-xs font-bold text-slate-500">
+                        M{{ $month }}
+                    </div>
+
+                @endfor
+
+
+                {{-- Timeline rows --}}
+                @foreach($finalTimelineInitiatives as $initiative)
+
+                    @php
+                        $startMonth = max(
+                            1,
+                            (int) $initiative->start_month
+                        );
+
+                        $durationMonths = max(
+                            1,
+                            (int) $initiative->duration_months
+                        );
+
+                        $endMonth = min(
+                            $finalRoadmapTimelineMonths,
+                            $startMonth + $durationMonths - 1
+                        );
+
+                        $ganttPriorityColor = match(
+                            strtolower($initiative->priority ?? '')
+                        ) {
+                            'high' => 'bg-red-400',
+                            'medium' => 'bg-amber-400',
+                            'low' => 'bg-emerald-400',
+                            default => 'bg-yellow-400',
+                        };
+                    @endphp
+
+
+                    {{-- Initiative --}}
+                    <div class="sticky left-0 z-10 flex items-center gap-2.5 border-b border-slate-100 bg-white px-4 py-4">
+
+                        <span class="h-2 w-2 flex-none rounded-full {{ $ganttPriorityColor }}"></span>
+
+                        <div class="min-w-0">
+
+                            <p
+                                class="truncate text-sm font-semibold text-slate-800"
+                                title="{{ $initiative->title }}"
+                            >
+                                {{ $initiative->title }}
+                            </p>
+
+                            <p class="mt-1 text-xs text-slate-400">
+                                {{ $initiative->phase
+                                    ?? ('Months ' . $startMonth . '-' . $endMonth) }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- Month cells --}}
+                    @for(
+                        $month = 1;
+                        $month <= $finalRoadmapTimelineMonths;
+                        $month++
+                    )
+
+                        @php
+                            $isActive =
+                                $month >= $startMonth
+                                && $month <= $endMonth;
+                        @endphp
+
+                        <div class="relative flex min-h-[64px] items-center border-b border-l border-slate-100">
+
+                            @if($isActive)
+
+                                <div
+                                    class="
+                                        absolute inset-y-0 my-auto h-7
+                                        {{ $ganttPriorityColor }}
+
+                                        {{ $month === $startMonth
+                                            ? 'left-1 right-0 rounded-l-lg'
+                                            : 'left-0 right-0'
+                                        }}
+
+                                        {{ $month === $endMonth
+                                            ? 'right-1 rounded-r-lg'
+                                            : ''
+                                        }}
+                                    "
+                                    title="{{ $initiative->title }} — {{ $initiative->phase }}"
+                                ></div>
+
+                            @endif
+
+                        </div>
+
+                    @endfor
+
+                @endforeach
+
+            </div>
+
+        </div>
+
+
+        {{-- Priority legend --}}
+        <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-400">
+
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-red-400"></span>
+                <span>High priority</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+                <span>Medium priority</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                <span>Low priority</span>
+            </div>
+
+        </div>
+
+    </div>
+
+@endif
+
 {{-- Overall Expert Guidance --}}
 @if($finalRoadmap->consultant_notes || $finalRoadmap->risks_dependencies)
 
@@ -2259,7 +2479,7 @@ Expert Guidance            </h3>
                 <path d="M5 21h14"></path>
             </svg>
 
-            Download Roadmap PDF
+            Download PDF
         </a>
 
     </div>

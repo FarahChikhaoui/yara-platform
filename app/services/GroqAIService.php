@@ -97,13 +97,50 @@ class GroqAIService
                 'max_completion_tokens' => 4096,
             ]);
 
-        if ($response->failed()) {
-            throw new RuntimeException(
-                'Groq AI request failed: ' .
-                $response->status() . ' ' .
-                $response->body()
-            );
-        }
+       if ($response->failed()) {
+
+    /*
+     * Log the complete Groq rate-limit response so we can
+     * identify exactly which quota is being exceeded.
+     */
+    if ($response->status() === 429) {
+        Log::error('Groq full rate limit response', [
+            'model' => $this->model,
+            'status' => $response->status(),
+
+            'body' => $response->body(),
+
+            'headers' => [
+                'retry-after' =>
+                    $response->header('retry-after'),
+
+                'x-ratelimit-limit-requests' =>
+                    $response->header('x-ratelimit-limit-requests'),
+
+                'x-ratelimit-remaining-requests' =>
+                    $response->header('x-ratelimit-remaining-requests'),
+
+                'x-ratelimit-reset-requests' =>
+                    $response->header('x-ratelimit-reset-requests'),
+
+                'x-ratelimit-limit-tokens' =>
+                    $response->header('x-ratelimit-limit-tokens'),
+
+                'x-ratelimit-remaining-tokens' =>
+                    $response->header('x-ratelimit-remaining-tokens'),
+
+                'x-ratelimit-reset-tokens' =>
+                    $response->header('x-ratelimit-reset-tokens'),
+            ],
+        ]);
+    }
+
+    throw new RuntimeException(
+        'Groq AI request failed: ' .
+        $response->status() . ' ' .
+        $response->body()
+    );
+}
 
         $content = $response->json(
             'choices.0.message.content'

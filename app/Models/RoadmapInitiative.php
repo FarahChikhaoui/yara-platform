@@ -24,6 +24,8 @@ class RoadmapInitiative extends Model
     'dimension',
     'priority',
     'phase',
+    'start_month',
+'duration_months',
     'effort',
     'impact',
 

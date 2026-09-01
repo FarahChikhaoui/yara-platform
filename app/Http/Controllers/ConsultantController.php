@@ -537,7 +537,17 @@ $this->authorizeAssignedConsultant($assessment);
     $timeline = $preference->timeframe;
     $budget = $preference->budget_level;
     $strategicPriorities = $preference->strategic_priorities ?? [];
-
+/*
+ * Convert the client's selected Transformation horizon
+ * into a maximum number of months for timeline validation.
+ */
+$timelineMonths = match ($timeline) {
+    '3 months' => 3,
+    '6 months' => 6,
+    '12 months' => 12,
+    '18-24 months' => 24,
+    default => null,
+};
     /*
      * Load assessment/company information.
      */
@@ -831,7 +841,36 @@ Account for dependencies.
 
 Foundation initiatives should generally occur before capabilities
 that depend on them.
+For every initiative, you MUST also return:
 
+- start_month: integer representing the first month of the initiative.
+- duration_months: integer representing how many months the initiative lasts.
+
+These values are used to generate the Transformation Gantt chart.
+
+They MUST respect the client's TOTAL timeline horizon.
+
+For example, if the client selected a 6-month roadmap:
+
+- start_month must be between 1 and 6.
+- duration_months must be at least 1.
+- start_month + duration_months - 1 must NEVER exceed 6.
+
+Example:
+
+timeline: "Months 2-4"
+start_month: 2
+duration_months: 3
+
+Initiatives may overlap when appropriate.
+
+Dependencies must be reflected in sequencing.
+
+Do not schedule a dependent initiative before the capability or
+initiative it depends on has progressed sufficiently.
+
+Use the full roadmap horizon intelligently. Do not unnecessarily
+compress every initiative into the first few months.
 ==================================================
 PRIORITY RULES
 ==================================================
@@ -981,9 +1020,11 @@ Use EXACTLY this structure:
       ],
 
       "business_impact": "high",
-      "effort": "medium",
-      "timeline": "Months 1-2",
-      "investment": "$5,000 - $10,000",
+"effort": "medium",
+"timeline": "Months 1-2",
+"start_month": 1,
+"duration_months": 2,
+"investment": "$5,000 - $10,000",
       "standard_reference": "ISO/IEC 42001"
     }
   ]
@@ -1115,6 +1156,45 @@ if (!$roadmap) {
         if (!in_array($impact, ['low', 'medium', 'high'], true)) {
             $impact = 'medium';
         }
+        /*
+ * Normalize and validate AI-generated timeline values.
+ */
+$startMonth = isset($action['start_month'])
+    ? max(1, (int) $action['start_month'])
+    : 1;
+
+$durationMonths = isset($action['duration_months'])
+    ? max(1, (int) $action['duration_months'])
+    : 1;
+
+/*
+ * Ensure the initiative cannot extend beyond
+ * the client's selected Transformation horizon.
+ */
+if ($timelineMonths !== null) {
+
+    $startMonth = min(
+        $startMonth,
+        $timelineMonths
+    );
+
+    $maximumDuration =
+        $timelineMonths - $startMonth + 1;
+
+    $durationMonths = min(
+        $durationMonths,
+        $maximumDuration
+    );
+}
+/*
+ * Build the human-readable timeline from the validated
+ * machine-readable timing values.
+ */
+$endMonth = $startMonth + $durationMonths - 1;
+
+$timelineLabel = $startMonth === $endMonth
+    ? 'Month ' . $startMonth
+    : 'Months ' . $startMonth . '-' . $endMonth;
 
         $roadmap->initiatives()->create([
             'title' =>
@@ -1153,11 +1233,17 @@ if (!$roadmap) {
             /*
              * AI "timeline" maps to our database "phase".
              */
-            'phase' =>
-                $action['timeline'] ?? null,
+           'phase' =>
+    $timelineLabel,
 
-            'effort' =>
-                $effort,
+'start_month' =>
+    $startMonth,
+
+'duration_months' =>
+    $durationMonths,
+
+'effort' =>
+    $effort,
 
             'impact' =>
                 $impact,
@@ -1289,11 +1375,16 @@ AuditLogger::log(
                                 $initiative->priority,
 
                             'phase' =>
-                                $initiative->phase,
+    $initiative->phase,
 
-                            'effort' =>
-                                $initiative->effort,
+'start_month' =>
+    $initiative->start_month,
 
+'duration_months' =>
+    $initiative->duration_months,
+
+'effort' =>
+    $initiative->effort,
                             'impact' =>
                                 $initiative->impact,
 
