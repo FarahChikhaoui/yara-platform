@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationCodeController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
@@ -56,4 +57,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
+                Route::get('/verify-email-code', [EmailVerificationCodeController::class, 'create'])
+    ->name('verification.notice');
+
+Route::post('/verify-email-code', [EmailVerificationCodeController::class, 'store'])
+    ->name('verification.code.store');
+  Route::post('/verify-email-code/resend', [EmailVerificationCodeController::class, 'resend'])
+    ->name('verification.code.resend');
 });

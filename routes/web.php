@@ -130,8 +130,7 @@ $maturityLevels = \App\Models\MaturityLevel::orderBy('min_score')
         'assessmentHistory'
     ));
 
-})->middleware(['auth', 'client'])->name('dashboard');
-
+})->middleware(['auth', 'verified', 'client'])->name('dashboard');
 /*
 |--------------------------------------------------------------------------
 | Profile
@@ -147,21 +146,21 @@ Route::get(
     '/assessment/{assessment}/transformation/payment',
     [TransformationPaymentController::class, 'show']
 )
-    ->middleware('client')
+    ->middleware(['verified', 'client'])
     ->name('transformation.payment.page');
 
 Route::post(
     '/assessment/{assessment}/transformation/checkout',
     [TransformationPaymentController::class, 'checkout']
 )
-    ->middleware('client')
+    ->middleware(['verified', 'client'])
     ->name('transformation.payment.checkout');
 
 Route::get(
     '/assessment/{assessment}/transformation/payment/success',
     [TransformationPaymentController::class, 'success']
 )
-    ->middleware('client')
+    ->middleware(['verified', 'client'])
     ->name('transformation.payment.success');
 
 
@@ -169,7 +168,7 @@ Route::post(
     '/assessment/{assessment}/start-transformation',
     [AssessmentController::class, 'startTransformationFromAssessment']
 )
-    ->middleware('client')
+    ->middleware(['verified', 'client'])
     ->name('transformation.from-assessment');
 
 
@@ -190,8 +189,8 @@ Route::post(
 | Assessment
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'client'])->group(function () {
-    Route::get(
+Route::middleware(['auth', 'verified', 'client'])->group(function () {
+        Route::get(
     '/assessment/progress/compare',
     [AssessmentController::class, 'comparison']
 )->name('assessment.comparison');
@@ -289,18 +288,18 @@ Route::get('/build-transformation-roadmap', function () {
  * — added here to match every other assessment route.
  */
 Route::post('/assessment/{assessment}/generate-roadmap', [AssessmentController::class, 'generateRoadmap'])
-    ->middleware(['auth', 'client'])
+    ->middleware(['auth', 'verified', 'client'])
     ->name('assessment.generate-roadmap');
 
 Route::post('/company/store', [CompanyController::class, 'store'])
-    ->middleware(['auth', 'client']);
+    ->middleware(['auth', 'verified', 'client']);
 
 Route::get(
     '/assessment/results/{assessment}/country',
     [AssessmentController::class, 'countryInsights']
 )
-    ->middleware(['auth', 'client'])
-    ->name('assessment.country');
+    ->middleware(['auth', 'verified', 'client'])
+->name('assessment.country');
     
 
 /*

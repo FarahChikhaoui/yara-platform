@@ -72,27 +72,71 @@
 
             <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
 
-                <div class="flex items-center gap-4 mb-8">
+                <div class="flex items-center gap-5 mb-8">
 
-                    <div class="w-16 h-16 rounded-full bg-yellow-400 text-slate-950 font-bold text-2xl flex items-center justify-center">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
+    {{-- Profile photo --}}
+    <div class="relative shrink-0">
 
-                    <div>
-                        <p class="text-xl font-bold text-slate-950">
-                            {{ Auth::user()->name }}
-                        </p>
+        <div class="w-20 h-20 rounded-full overflow-hidden
+                    bg-yellow-400 border-4 border-white shadow-sm
+                    flex items-center justify-center">
 
-                        <p class="text-slate-500">
-                            {{ Auth::user()->email }}
-                        </p>
+            @if(Auth::user()->profile_photo)
 
-                        <span class="inline-flex mt-2 bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full">
-                            {{ ucfirst(Auth::user()->role) }}
-                        </span>
-                    </div>
+                <img
+                    id="profile-photo-preview"
+                    src="{{ asset('storage/' . Auth::user()->profile_photo) }}"
+                    alt="{{ Auth::user()->name }}"
+                    class="w-full h-full object-cover"
+                >
 
-                </div>
+                <span
+                    id="profile-photo-initial"
+                    class="hidden text-slate-950 font-bold text-2xl"
+                >
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                </span>
+
+            @else
+
+                <img
+                    id="profile-photo-preview"
+                    src=""
+                    alt=""
+                    class="hidden w-full h-full object-cover"
+                >
+
+                <span
+                    id="profile-photo-initial"
+                    class="text-slate-950 font-bold text-2xl"
+                >
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                </span>
+
+            @endif
+
+        </div>
+
+    </div>
+
+    {{-- User information --}}
+    <div class="min-w-0">
+
+        <p class="text-xl font-bold text-slate-950">
+            {{ Auth::user()->name }}
+        </p>
+
+        <p class="truncate text-slate-500">
+            {{ Auth::user()->email }}
+        </p>
+
+        <span class="inline-flex mt-2 bg-slate-950 text-white text-xs font-bold px-3 py-1 rounded-full">
+            {{ ucfirst(Auth::user()->role) }}
+        </span>
+
+    </div>
+
+</div>
 
                 <div class="grid grid-cols-1 {{ Auth::user()->role === 'admin' ? 'md:grid-cols-2' : 'md:grid-cols-3' }} gap-4 mb-8">
 
