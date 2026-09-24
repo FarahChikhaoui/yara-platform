@@ -44,7 +44,8 @@ protected $fillable = [
 'paid_at',
 'framework_version',
 'stripe_checkout_session_id',
-'assigned_consultant_id'
+'assigned_consultant_id',
+'completed_at'
 ];
 
 public function recommendations()
@@ -53,6 +54,8 @@ public function recommendations()
 }
 protected $casts = [
     'reviewed_at' => 'datetime',
+        'completed_at' => 'datetime',
+
 ];
 
 public function roadmapPreference()

@@ -72,7 +72,30 @@ Route::get('/dashboard', function () {
         ? round((float) $latestCompleted->company_score, 1)
         : null;
 
+// -------------------------------------------------
+// ASSESSMENT RETAKE COOLDOWN
+// -------------------------------------------------
 
+$latestSelfAssessment = $assessments
+    ->where('user_id', $user->id)
+    ->where('engagement_type', 'self_assessment')
+    ->where('status', 'completed')
+    ->whereNotNull('completed_at')
+    ->sortByDesc('completed_at')
+    ->first();
+
+$nextAssessmentDate = null;
+$assessmentOnCooldown = false;
+
+if ($latestSelfAssessment) {
+
+    $nextAssessmentDate = $latestSelfAssessment
+        ->completed_at
+        ->copy()
+        ->addMonthsNoOverflow(3);
+
+    $assessmentOnCooldown = now()->lt($nextAssessmentDate);
+}
     // Difference between the latest and previous completed assessment
     $previousCompleted = $completedAssessments->count() >= 2
         ? $completedAssessments[$completedAssessments->count() - 2]
@@ -127,6 +150,8 @@ $maturityLevels = \App\Models\MaturityLevel::orderBy('min_score')
         'currentScore',
         'maturityLevels',
         'scoreChange',
+        'nextAssessmentDate',
+'assessmentOnCooldown',
         'assessmentHistory'
     ));
 

@@ -199,7 +199,9 @@
 @if($inProgressAssessment)
 
     <a href="{{ route('assessment.resume', $inProgressAssessment) }}"
-class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 sm:w-auto sm:shrink-0"        Continue Assessment
+       class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 sm:w-auto sm:shrink-0">
+
+        Continue Assessment
 
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 24 24"
@@ -211,12 +213,46 @@ class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-
                   stroke-linejoin="round"
                   d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
         </svg>
+
     </a>
+
+@elseif($assessmentOnCooldown)
+
+    <div class="w-full sm:w-auto sm:shrink-0">
+
+        <button
+            type="button"
+            disabled
+            class="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 px-6 py-3 font-semibold text-slate-400 sm:w-auto"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.75"
+                 class="h-4 w-4">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 0 0-9 0v3.75m-.75 0h10.5A2.25 2.25 0 0 1 19.5 12.75v6A2.25 2.25 0 0 1 17.25 21H6.75A2.25 2.25 0 0 1 4.5 18.75v-6A2.25 2.25 0 0 1 6.75 10.5Z" />
+            </svg>
+
+            Assessment Completed
+        </button>
+
+        <p class="mt-2 text-center text-xs font-medium text-slate-500">
+            Next assessment available
+            <span class="font-semibold text-slate-700">
+                {{ $nextAssessmentDate->format('d M Y') }}
+            </span>
+        </p>
+
+    </div>
 
 @else
 
-    <a href="/assessment/start"
+    <a href="{{ route('assessment.start') }}"
        class="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-950 px-6 py-3 font-semibold text-white transition hover:bg-slate-800">
+
         Start Assessment
 
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -229,6 +265,7 @@ class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-
                   stroke-linejoin="round"
                   d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
         </svg>
+
     </a>
 
 @endif

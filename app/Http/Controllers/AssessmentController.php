@@ -58,6 +58,61 @@ class AssessmentController extends Controller
         ->latest()
         ->first();
 
+/*
+ * Retake rule for the normal AI Readiness Assessment.
+ *
+ * A completed self-assessment can only be retaken
+ * once every 3 months.
+ *
+ * Transformation assessments are a separate journey
+ * and are not affected by this cooldown.
+ *
+ * Existing in-progress assessments can always resume.
+ */
+/*
+ * Retake rule for the normal AI Readiness Assessment.
+ *
+ * A completed self-assessment can only be retaken
+ * once every 3 months.
+ *
+ * Transformation assessments are separate and are
+ * not affected by this cooldown.
+ *
+ * Existing in-progress assessments can always resume.
+ */
+if (!$assessment && !$isTransformationJourney) {
+
+    $lastCompletedAssessment = Assessment::where(
+            'company_id',
+            auth()->user()->company_id
+        )
+        ->where('user_id', auth()->id())
+        ->where('engagement_type', 'self_assessment')
+        ->where('status', 'completed')
+        ->whereNotNull('completed_at')
+        ->latest('completed_at')
+        ->first();
+
+    if ($lastCompletedAssessment) {
+
+        $nextRetakeDate = $lastCompletedAssessment
+            ->completed_at
+            ->copy()
+            ->addMonthsNoOverflow(3);
+
+        if (now()->lt($nextRetakeDate)) {
+
+            return redirect()
+                ->route('dashboard')
+                ->with(
+                    'assessment_cooldown',
+                    'Your next AI Readiness Assessment will be available on '
+                    . $nextRetakeDate->format('d M Y')
+                    . '.'
+                );
+        }
+    }
+}
 
     /*
      * No unfinished assessment exists for this journey,
@@ -400,6 +455,8 @@ $countryYear = $countryBenchmark?->year;
 
         $assessment->update([
             'status' => 'completed',
+                'completed_at' => now(),
+
             'company_score' => round($companyScore, 2),
             'country_ai_score' => $countryScore !== null
                 ? round($countryScore, 2)

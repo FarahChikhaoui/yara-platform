@@ -79,7 +79,12 @@
             >
                 Login
             </a>
-
+<a href="{{ route('register') }}"
+   class="rounded-lg bg-yellow-400 px-4 py-2
+          font-semibold text-slate-950
+          transition hover:bg-yellow-300">
+    Sign up
+</a>
           
 
         </nav>
