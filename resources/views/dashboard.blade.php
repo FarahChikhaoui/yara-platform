@@ -88,16 +88,34 @@
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                         <div>
-                            <label for="industry" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                Industry
-                            </label>
-                            <input
-                                id="industry"
-                                name="industry"
-                                placeholder="e.g. Manufacturing"
-                                class="w-full rounded-lg border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-950 focus:ring-slate-950"
-                            >
-                        </div>
+    <label for="industry" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Industry
+    </label>
+
+    <select
+        id="industry"
+        name="industry"
+        required
+        class="w-full rounded-lg border-slate-300 text-slate-900 focus:border-slate-950 focus:ring-slate-950"
+    >
+        <option value="Technology & Software">Technology & Software</option>
+<option value="Banking & Financial Services">Banking & Financial Services</option>
+<option value="Insurance">Insurance</option>
+<option value="Healthcare & Life Sciences">Healthcare & Life Sciences</option>
+<option value="Manufacturing">Manufacturing</option>
+<option value="Consumer Goods & Retail">Consumer Goods & Retail</option>
+<option value="Telecommunications">Telecommunications</option>
+<option value="Energy & Utilities">Energy & Utilities</option>
+<option value="Transportation & Logistics">Transportation & Logistics</option>
+<option value="Professional Services & Consulting">Professional Services & Consulting</option>
+<option value="Media & Entertainment">Media & Entertainment</option>
+<option value="Real Estate & Construction">Real Estate & Construction</option>
+<option value="Education">Education</option>
+<option value="Government & Public Sector">Government & Public Sector</option>
+<option value="Agriculture & Food">Agriculture & Food</option>
+<option value="Other">Other</option>
+    </select>
+</div>
 
                         <div>
                             <label for="country" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">

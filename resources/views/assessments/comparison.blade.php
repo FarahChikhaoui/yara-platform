@@ -20,8 +20,8 @@
     $biggestImprovement = $improvements->first();
     $biggestDecline = $declines->first();
 
-    $previousDate = optional($previousAssessment->updated_at)->format('d M Y');
-    $currentDate = optional($currentAssessment->updated_at)->format('d M Y');
+    $previousDate = optional($previousAssessment->completed_at)->format('d M Y');
+$currentDate = optional($currentAssessment->completed_at)->format('d M Y');
 @endphp
 
 
@@ -202,8 +202,7 @@
                                 value="{{ $assessment->id }}"
                                 @selected($assessment->id === $previousAssessment->id)
                             >
-                                {{ optional($assessment->updated_at)->format('d M Y') }}
-                                · {{ number_format((float) $assessment->company_score, 1) }}
+{{ optional($assessment->completed_at)->format('d M Y') }}                                · {{ number_format((float) $assessment->company_score, 1) }}
                             </option>
 
                         @endforeach
@@ -262,8 +261,7 @@
                                 value="{{ $assessment->id }}"
                                 @selected($assessment->id === $currentAssessment->id)
                             >
-                                {{ optional($assessment->updated_at)->format('d M Y') }}
-                                · {{ number_format((float) $assessment->company_score, 1) }}
+{{ optional($assessment->completed_at)->format('d M Y') }}                                · {{ number_format((float) $assessment->company_score, 1) }}
                             </option>
 
                         @endforeach

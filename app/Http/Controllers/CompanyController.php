@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Company;
+use Illuminate\Validation\Rule;
 
 
 class CompanyController extends Controller
@@ -12,8 +13,28 @@ class CompanyController extends Controller
 {
     $validated = $request->validate([
         'name' => ['required', 'string', 'max:255'],
-        'industry' => ['required', 'string', 'max:255'],
-        'country' => ['required', 'string', 'max:255'],
+'industry' => [
+    'required',
+    'string',
+    Rule::in([
+        'Technology & Software',
+        'Banking & Financial Services',
+        'Insurance',
+        'Healthcare & Life Sciences',
+        'Manufacturing',
+        'Consumer Goods & Retail',
+        'Telecommunications',
+        'Energy & Utilities',
+        'Transportation & Logistics',
+        'Professional Services & Consulting',
+        'Media & Entertainment',
+        'Real Estate & Construction',
+        'Education',
+        'Government & Public Sector',
+        'Agriculture & Food',
+        'Other',
+    ]),
+],        'country' => ['required', 'string', 'max:255'],
     ]);
 
     $company = Company::create([

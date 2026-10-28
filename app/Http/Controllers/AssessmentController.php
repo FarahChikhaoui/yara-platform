@@ -59,39 +59,26 @@ class AssessmentController extends Controller
         ->first();
 
 /*
- * Retake rule for the normal AI Readiness Assessment.
+ * Retake rule for the AI Readiness Assessment.
  *
- * A completed self-assessment can only be retaken
- * once every 3 months.
+ * Once the organization completes an assessment,
+ * it cannot start a new assessment for 3 months.
  *
- * Transformation assessments are a separate journey
- * and are not affected by this cooldown.
+ * The cooldown remains valid even if the completed
+ * assessment later becomes a Transformation engagement.
  *
- * Existing in-progress assessments can always resume.
- */
-/*
- * Retake rule for the normal AI Readiness Assessment.
- *
- * A completed self-assessment can only be retaken
- * once every 3 months.
- *
- * Transformation assessments are separate and are
- * not affected by this cooldown.
- *
- * Existing in-progress assessments can always resume.
+ * Existing in-progress assessments can still be resumed.
  */
 if (!$assessment && !$isTransformationJourney) {
 
     $lastCompletedAssessment = Assessment::where(
-            'company_id',
-            auth()->user()->company_id
-        )
-        ->where('user_id', auth()->id())
-        ->where('engagement_type', 'self_assessment')
-        ->where('status', 'completed')
-        ->whereNotNull('completed_at')
-        ->latest('completed_at')
-        ->first();
+        'company_id',
+        auth()->user()->company_id
+    )
+    ->where('status', 'completed')
+    ->whereNotNull('completed_at')
+    ->latest('completed_at')
+    ->first();
 
     if ($lastCompletedAssessment) {
 
@@ -2100,7 +2087,7 @@ return view('assessments.partials.ai-summary-results', [
         ->where('user_id', $user->id)
         ->where('status', 'completed')
         ->whereNotNull('company_score')
-        ->orderBy('created_at')
+        ->orderBy('completed_at')
         ->get();
 
     /*
@@ -2156,7 +2143,7 @@ if (request()->filled('previous') && request()->filled('current')) {
  * older assessment -> newer assessment.
  */
 if (
-    $previousAssessment->created_at->gt($currentAssessment->created_at)
+    $previousAssessment->completed_at->gt($currentAssessment->completed_at)
 ) {
     [$previousAssessment, $currentAssessment] = [
         $currentAssessment,

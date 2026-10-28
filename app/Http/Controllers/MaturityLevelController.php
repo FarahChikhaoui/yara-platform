@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MaturityLevel;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 
 class MaturityLevelController extends Controller
@@ -29,13 +30,19 @@ class MaturityLevelController extends Controller
             'description' => 'nullable',
         ]);
 
-        MaturityLevel::create([
+        $maturityLevel = MaturityLevel::create([
             'level' => $request->level,
             'name' => $request->name,
             'min_score' => $request->min_score,
             'max_score' => $request->max_score,
             'description' => $request->description,
         ]);
+
+        AuditLogger::log(
+            'maturity_level_created',
+            $maturityLevel,
+            "Created maturity level {$maturityLevel->level}: {$maturityLevel->name}"
+        );
 
         return redirect('/admin/maturity-levels');
     }
@@ -63,11 +70,23 @@ class MaturityLevelController extends Controller
             'description' => $request->description,
         ]);
 
+        AuditLogger::log(
+            'maturity_level_updated',
+            $maturityLevel,
+            "Updated maturity level {$maturityLevel->level}: {$maturityLevel->name}"
+        );
+
         return redirect('/admin/maturity-levels');
     }
 
     public function destroy(MaturityLevel $maturityLevel)
     {
+        AuditLogger::log(
+            'maturity_level_deleted',
+            $maturityLevel,
+            "Deleted maturity level {$maturityLevel->level}: {$maturityLevel->name}"
+        );
+
         $maturityLevel->delete();
 
         return redirect('/admin/maturity-levels');

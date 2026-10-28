@@ -76,9 +76,7 @@ Route::get('/dashboard', function () {
 // ASSESSMENT RETAKE COOLDOWN
 // -------------------------------------------------
 
-$latestSelfAssessment = $assessments
-    ->where('user_id', $user->id)
-    ->where('engagement_type', 'self_assessment')
+$latestCompletedForCooldown = $assessments
     ->where('status', 'completed')
     ->whereNotNull('completed_at')
     ->sortByDesc('completed_at')
@@ -87,9 +85,9 @@ $latestSelfAssessment = $assessments
 $nextAssessmentDate = null;
 $assessmentOnCooldown = false;
 
-if ($latestSelfAssessment) {
+if ($latestCompletedForCooldown) {
 
-    $nextAssessmentDate = $latestSelfAssessment
+    $nextAssessmentDate = $latestCompletedForCooldown
         ->completed_at
         ->copy()
         ->addMonthsNoOverflow(3);
